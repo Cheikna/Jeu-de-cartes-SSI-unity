@@ -15,7 +15,6 @@ public class PlayerController : NetworkBehaviour {
     [SerializeField]
     private GameObject controlPanel;
 
-    [SerializeField]
     public Button goLeftBtn;
     public Button goRightBtn;
     public Button goUpBtn;
