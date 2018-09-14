@@ -13,7 +13,7 @@ ExportedObj/
 .consulo/
 *.csproj
 *.unityproj
-*.sln
+# *.sln
 *.suo
 *.tmp
 *.user
@@ -32,5 +32,5 @@ ExportedObj/
 sysinfo.txt
 
 # Builds
-*.apk
+#*.apk
 *.unitypackage

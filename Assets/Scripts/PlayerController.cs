@@ -108,7 +108,7 @@ public class PlayerController : NetworkBehaviour {
             CmdFire();
         }
         else
-            Debug.Log("not working cheikna");
+            Debug.Log("not working");
 
         transform.Rotate(0, moveX * 5, 0);
         transform.Translate(0, 0, moveZ);

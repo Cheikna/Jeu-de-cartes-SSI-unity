@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BuilBoard : MonoBehaviour {
+public class BuildBoard : MonoBehaviour {
 	void Update () {
         transform.LookAt(Camera.main.transform);
 		
