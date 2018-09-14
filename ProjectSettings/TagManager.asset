@@ -9,6 +9,8 @@ TagManager:
   - up
   - down
   - fire
+  - regina
+  - boss
   layers:
   - Default
   - TransparentFX

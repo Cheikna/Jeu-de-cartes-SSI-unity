@@ -7,4 +7,8 @@ Personnages:
 https://www.mixamo.com/#/?limit=96&page=1&type=Character
 
 Table de billard : 
-https://3dsky.org/3dmodels/show/bil_iardnaia_kolliektsiia_high_tech_fabriki_start
+https://3dsky.org/3dmodels/show/bil_iardnyi_stol_14
+https://3dsky.org/3dmodels/show/bil_iardnyi_stol_wik_kantslier
+
+Chaise :
+https://www.turbosquid.com/3d-models/armchair-chair-3ds-free/832916
