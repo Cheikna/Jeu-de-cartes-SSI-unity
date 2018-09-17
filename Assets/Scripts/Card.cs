@@ -22,14 +22,15 @@ public class Card {
     public string definition { get; set; }
     public string action { get; set; }
 
-    public Card(string name, string definition, string action, bool isAttackCard, int damage, Color cardColor)
+    public Card(string name, string definition, string action, bool isAttackCard, ComputerLayer touchedLayer, int damage, Color cardColor)
     {
-        this.name = name;
+        this.name = name.ToUpper();
         this.definition = definition;
         this.action = action;
         this.isAttackCard = isAttackCard;
         this.damage = damage;
         this.cardColor = cardColor;
+        this.touchedLayer = touchedLayer;
 
     }
 

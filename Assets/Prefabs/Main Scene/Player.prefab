@@ -1185,21 +1185,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1377464606462874}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4e4cc66b1db86a4c8c38a6db90e3403, type: 3}
+  m_Script: {fileID: 11500000, guid: 287ebed3e01536c41999d4c58d48ae24, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   bulletPrefab: {fileID: 1902034445799496, guid: 4b9824ec6b15f0b4d94842164468704f,
     type: 2}
   bulletSpawn: {fileID: 4797184685866298}
-  controlPanel: {fileID: 1725429812140468, guid: 92e9a1ef822d6af47a39a5f8e9f64ac7,
-    type: 2}
-  goLeftBtn: {fileID: 114700973717835158, guid: 92e9a1ef822d6af47a39a5f8e9f64ac7,
-    type: 2}
-  goRightBtn: {fileID: 114889000245809800, guid: 92e9a1ef822d6af47a39a5f8e9f64ac7,
-    type: 2}
-  goUpBtn: {fileID: 114055199012501664, guid: 92e9a1ef822d6af47a39a5f8e9f64ac7, type: 2}
-  goDownBtn: {fileID: 114743192845467714, guid: 92e9a1ef822d6af47a39a5f8e9f64ac7,
-    type: 2}
+  controlPanel: {fileID: 0}
+  goLeftBtn: {fileID: 0}
+  goRightBtn: {fileID: 0}
+  goUpBtn: {fileID: 0}
+  goDownBtn: {fileID: 0}
 --- !u!114 &114936829281562486
 MonoBehaviour:
   m_ObjectHideFlags: 1

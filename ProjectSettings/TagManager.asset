@@ -11,6 +11,13 @@ TagManager:
   - fire
   - regina
   - boss
+  - healthCanvas
+  - mainCanvas
+  - myCardsCanvas
+  - chooseCharacterCanvas
+  - femaleCharacterButton
+  - maleCharacterButton
+  - playerElements
   layers:
   - Default
   - TransparentFX

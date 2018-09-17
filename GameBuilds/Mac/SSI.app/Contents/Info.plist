@@ -10,13 +10,13 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>Mac</string>
+	<string>SSI</string>
 	<key>CFBundleGetInfoString</key>
 	<string>Unity Player version 2018.2.7f1 (4ebd28dd9664). (c) 2018 Unity Technologies ApS. All rights reserved.</string>
 	<key>CFBundleIconFile</key>
 	<string>PlayerIcon.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.Company.ProductName</string>
+	<string>com.GamixLab.JeuDeCartes</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleSupportedPlatforms</key>
@@ -30,7 +30,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
+	<string>2.1</string>
 	<key>CFBundleVersion</key>
 	<string>0</string>
 	<key>NSMainNibFile</key>

@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
-public class PlayerController : NetworkBehaviour {
+public class PlayerController1 : NetworkBehaviour {
 
     [SerializeField]
     public GameObject bulletPrefab;
