@@ -1,11 +1,7 @@
 # Jeu-de-cartes-SSI
 Jeu de cartes SSI, Sensibilisation à la sécurité des systèmes d’information
 
-# Comment jouer ?
-- Se rendre sur la page "https://github.com/GamixlabGames/Jeu-de-cartes-SSI"
-- Cliquer sur "Clone or download" puis "Download ZIP"
-- Une fois téléchargé, extraire le fichier.
--...
+# Pour jouer à ce jeu, rendez vous sur le site : https://github.com/SecuriteSystemesInformations/Jeu-de-cartes-SSI/
 
 # Sources
 Personnages:
