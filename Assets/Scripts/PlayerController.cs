@@ -6,6 +6,18 @@ using UnityEngine.UI;
 
 public class PlayerController : NetworkBehaviour
 {
+    List<GameObject> playersInGame;
+    public bool isItMyTurn { get; set; }
+    public bool isItMyTurn2;
+    public bool isGameOver { get; set; }
+    int indexPlayerWhoPlays = -1;
+
+    [SerializeField]
+    private Canvas isItMyTurnCanvas;
+    [SerializeField]
+    private Text isItMyTurnText;
+    [SerializeField]
+    private Button confirmCardButton;
 
     [SerializeField]
     private GameObject virusPrefab;
@@ -35,10 +47,17 @@ public class PlayerController : NetworkBehaviour
     // Use this for initialization
     void Start()
     {
+        if (isServer)
+        {
+            playersInGame = new List<GameObject>();
+        }
+            
         if(isLocalPlayer)
         {
             //permet d'afficher uniquement ceux qui appartient au joueur local
             playerElements.SetActive(true);
+            isItMyTurn = false;
+            isGameOver = false;
 
             Button[] playerButtons = GetComponentsInChildren<Button>();
             // Trouver tous les boutons du joueur
@@ -64,93 +83,9 @@ public class PlayerController : NetworkBehaviour
             mainCanvas.gameObject.SetActive(false);
             chooseCharacterCanvas.gameObject.SetActive(true);
             healthCanvas.gameObject.SetActive(false);
-
-            // TODO faire en sorte d'afficher uniquement le personnage des adversaires sans les autres éléments comme les canvas
-
-            /*Component[] playerComponent = GetComponentsInChildren<Component>();
-            foreach(Component comp in playerComponent)
-            {
-                Debug.Log("component : " + comp.tag);
-                Debug.Log("component : " + comp.name);
-            }*/
-
+            isItMyTurnCanvas.gameObject.SetActive(false);
 
         }
-    }
-
-    public override void OnStartLocalPlayer()
-    {
-        Button[] playerButtons = GetComponentsInChildren<Button>();
-        Canvas[] playerCanvas = GetComponentsInChildren<Canvas>();
-        Component[] playerCharacters = GetComponentsInChildren<Component>();
-
-
-        // Trouver tous les boutons du joueur
-        /*foreach (Button btn in playerButtons)
-        {
-            string tag = btn.tag;
-
-            switch(tag)
-            {
-                case "femaleCharacterButton":
-                    femaleCharacterButton = btn;
-                    femaleCharacterButton.onClick.AddListener(delegate { CmdChooseCharacter("female"); });
-                    break;
-
-                case "maleCharacterButton":
-                    maleCharacterButton = btn;
-                    maleCharacterButton.onClick.AddListener(delegate { CmdChooseCharacter("male"); });
-                    break;
-            }
-        }*/
-
-        // Trouver tous les canvas du joueur
-        /*foreach (Canvas canvas in playerCanvas)
-        {            
-            switch (canvas.tag)
-            {
-                case "healthCanvas":
-                    healthCanvas = canvas;
-                    break;
-
-                case "mainCanvas":
-                    mainCanvas = canvas;
-                    break;
-
-                case "myCardsCanvas":
-                    showMyCardsCanvas = canvas;
-                    break;
-
-                case "chooseCharacterCanvas":
-                    chooseCharacterCanvas = canvas;
-                    break;
-            }
-
-
-        }*/
-
-        //Trouver les différents personnages
-        /*foreach(Component component in playerCharacters)
-        {
-            Debug.Log("personnage " + component.gameObject.tag);
-            switch(component.gameObject.tag)
-            {
-                
-                case "regina":
-                    femaleCharacter = component;
-                    break;
-
-                case "boss":
-                    maleCharacter = component;
-                    break;
-            }
-        }
-
-        showMyCardsCanvas.gameObject.SetActive(false);
-        mainCanvas.gameObject.SetActive(false);
-        chooseCharacterCanvas.gameObject.SetActive(true);
-        healthCanvas.gameObject.SetActive(false);*/
-
     }
 
     // Update is called once per frame
@@ -159,19 +94,44 @@ public class PlayerController : NetworkBehaviour
         if (!isLocalPlayer)
             return;
 
-        /*Component[] components = GetComponentsInChildren<Component>();
-        foreach(Component comp in components)
+        isItMyTurn2 = isItMyTurn;
+        //TODO add a blinking effect texte (effet clignotement)
+        if (isItMyTurn)
         {
-            comp.gameObject.SetActive(false);
-        }*/
-
-        /*if (Input.GetKeyDown(KeyCode.Space))
+            isItMyTurnText.text = "A votre tour de jouer";
+            confirmCardButton.interactable = true;
+        }
+        else
         {
-            //CmdFire();
-            shootFromCardsDeckClass();
+            isItMyTurnText.text = "Au tour de l'adversaire !";
+            confirmCardButton.interactable = false;
 
-        }*/
+        }
 
+    }
+
+    [Command]
+    public void CmdNextPlayerToPlay()
+    {
+        RpcServerChoosesWhoPlays();
+    }
+
+    [ClientRpc]
+    public void RpcServerChoosesWhoPlays()
+    {
+        playersInGame = new List<GameObject>(GameObject.FindGameObjectsWithTag("player"));
+        //if(isServer)
+        // {
+        indexPlayerWhoPlays += 1;
+            if (indexPlayerWhoPlays >= playersInGame.Count)
+                indexPlayerWhoPlays = 0;
+            foreach(GameObject player in playersInGame)
+            {
+                player.GetComponent<PlayerController>().isItMyTurn = false;
+            }
+            Debug.Log("Numéro du joueur qui doit jouer : " + indexPlayerWhoPlays);
+            playersInGame[indexPlayerWhoPlays].GetComponent<PlayerController>().isItMyTurn = true;
+        //}
     }
 
     public void shootFromCardsDeckClass(ComputerLayer targetLayer1, int damage1/*, ComputerLayer targetLayer2, int damage2*/)
@@ -232,6 +192,8 @@ public class PlayerController : NetworkBehaviour
         mainCanvas.gameObject.SetActive(true);
         chooseCharacterCanvas.gameObject.SetActive(false);
         healthCanvas.gameObject.SetActive(true);
+        isItMyTurnCanvas.gameObject.SetActive(true);
+        CmdNextPlayerToPlay();
     }
 
     public void hideMyCards()

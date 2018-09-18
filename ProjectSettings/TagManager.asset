@@ -18,6 +18,7 @@ TagManager:
   - femaleCharacterButton
   - maleCharacterButton
   - playerElements
+  - player
   layers:
   - Default
   - TransparentFX

@@ -83,6 +83,7 @@ public class CardsDeck : MonoBehaviour {
         numberOfCards--;*/
         showCardInformations();
         GetComponentInParent<PlayerController>().shootFromCardsDeckClass(card.touchedLayer, card.getDamage());
+        GetComponentInParent<PlayerController>().CmdNextPlayerToPlay();
     }
 
     public void onClickNextCard()

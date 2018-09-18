@@ -64,7 +64,11 @@ public class ComputerHealth : NetworkBehaviour {
         int remainingLife = currentOsHealth + currentSofwareHealth + currentHardwareHealth;
 
         if (remainingLife <= 0)
+        {
             Debug.Log("La partie est terminée, une équipe a perdu");
+            //PlayerController.isGameOver = true;
+        }
+            
     }
 
 
