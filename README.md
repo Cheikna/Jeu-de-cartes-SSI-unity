@@ -6,7 +6,7 @@ Jeu de cartes SSI, Sensibilisation à la sécurité des systèmes d’informatio
 
 # Sources
 Personnages:
-https://www.mixamo.com/#/?limit=96&page=1&type=Character
+- https://www.mixamo.com/#/?limit=96&page=1&type=Character
 
 Table de billard : 
 - https://3dsky.org/3dmodels/show/bil_iardnyi_stol_14
