@@ -1,7 +1,8 @@
 # Jeu-de-cartes-SSI
 Jeu de cartes SSI, Sensibilisation à la sécurité des systèmes d’information
 
-# Pour jouer à ce jeu, rendez vous sur le site : https://github.com/SecuriteSystemesInformations/Jeu-de-cartes-SSI/
+# Pour télécharger le jeu, rendez vous sur le site : 
+https://github.com/SecuriteSystemesInformations/Jeu-de-cartes-SSI/
 
 # Sources
 Personnages:
