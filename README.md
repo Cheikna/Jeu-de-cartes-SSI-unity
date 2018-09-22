@@ -17,3 +17,6 @@ Chaise :
 
 Interface de connexion :
 - https://assetstore.unity.com/packages/essentials/network-lobby-41836
+
+Cheval de Troie (icône Trojan) :
+- https://www.kisscc0.com/clipart/malware-trojan-horse-computer-software-computer-vi-xp9mwl/
