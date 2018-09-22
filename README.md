@@ -14,3 +14,6 @@ Table de billard :
 
 Chaise :
 - https://www.turbosquid.com/3d-models/armchair-chair-3ds-free/832916
+
+Interface de connexion :
+- https://assetstore.unity.com/packages/essentials/network-lobby-41836
