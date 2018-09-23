@@ -5,6 +5,9 @@ Jeu de cartes SSI, Sensibilisation à la sécurité des systèmes d’informatio
 - https://github.com/SecuriteSystemesInformations/Jeu-de-cartes-SSI/
 
 # Sources
+Ordinateurs :
+- https://www.cgtrader.com/items/836625/download-page#
+
 Personnages:
 - https://www.mixamo.com/#/?limit=96&page=1&type=Character
 
@@ -20,3 +23,10 @@ Interface de connexion :
 
 Cheval de Troie (icône Trojan) :
 - https://www.kisscc0.com/clipart/malware-trojan-horse-computer-software-computer-vi-xp9mwl/
+
+Access denied
+- https://commons.wikimedia.org/wiki/File:Access-denied_story.jpg
+- By Adelson Raimundo Reis Amaral [CC BY-SA 4.0  (https://creativecommons.org/licenses/by-sa/4.0)], from Wikimedia Commons
+
+Access granted :
+- By Adelson Raimundo Reis Amaral [CC BY-SA 4.0  (https://creativecommons.org/licenses/by-sa/4.0)], from Wikimedia Commons
