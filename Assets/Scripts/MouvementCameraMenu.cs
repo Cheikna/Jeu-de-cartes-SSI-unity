@@ -10,7 +10,7 @@ public class MouvementCameraMenu : MonoBehaviour {
 	private Transform vue_actuelle;
 	private float vitesse = 0.05f;
 	[SerializeField]
-	private Transform positionCameraMatiere;
+	private GameObject mainMenuComputer;
 	[SerializeField]
 	private Camera mainCamera;
 
@@ -41,6 +41,13 @@ public class MouvementCameraMenu : MonoBehaviour {
 
 	public void goToPlayScene()
 	{
-		SceneManager.LoadScene("Lobby");
+        mainMenuComputer.SetActive(false);
+        StartCoroutine(WaitFewSeconds());
 	}
+
+    IEnumerator WaitFewSeconds()
+    {
+        yield return new WaitForSeconds(2);
+        SceneManager.LoadScene("Lobby");
+    }
 }
