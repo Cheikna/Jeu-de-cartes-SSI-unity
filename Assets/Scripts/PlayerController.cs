@@ -10,7 +10,8 @@ public class PlayerController : NetworkBehaviour
     public bool isItMyTurn { get; set; }
     public bool isItMyTurn2;
     public bool isGameOver { get; set; }
-    int indexPlayerWhoPlays = -1;
+    bool doItOnce = false;
+    int indexPlayerWhoPlays = 0;
 
     [SerializeField]
     private Canvas isItMyTurnCanvas;
@@ -50,6 +51,7 @@ public class PlayerController : NetworkBehaviour
         if (isServer)
         {
             playersInGame = new List<GameObject>();
+            //playersInGame = new List<GameObject>(GameObject.FindGameObjectsWithTag("player"));
         }
             
         if(isLocalPlayer)
@@ -119,21 +121,27 @@ public class PlayerController : NetworkBehaviour
     [ClientRpc]
     public void RpcServerChoosesWhoPlays()
     {
-        playersInGame = new List<GameObject>(GameObject.FindGameObjectsWithTag("player"));
+        if(!doItOnce)
+        {
+            playersInGame = new List<GameObject>(GameObject.FindGameObjectsWithTag("player"));
+            doItOnce = true;
+
+        }
         //if(isServer)
         // {
+        if (indexPlayerWhoPlays >= playersInGame.Count)
+            indexPlayerWhoPlays = 0;
+        foreach(GameObject player in playersInGame)
+        {
+            player.GetComponent<PlayerController>().isItMyTurn = false;
+        }
+        Debug.Log("Numéro du joueur qui doit jouer : " + indexPlayerWhoPlays);
+        playersInGame[indexPlayerWhoPlays].GetComponent<PlayerController>().isItMyTurn = true;
         indexPlayerWhoPlays += 1;
-            if (indexPlayerWhoPlays >= playersInGame.Count)
-                indexPlayerWhoPlays = 0;
-            foreach(GameObject player in playersInGame)
-            {
-                player.GetComponent<PlayerController>().isItMyTurn = false;
-            }
-            Debug.Log("Numéro du joueur qui doit jouer : " + indexPlayerWhoPlays);
-            playersInGame[indexPlayerWhoPlays].GetComponent<PlayerController>().isItMyTurn = true;
         //}
     }
 
+    //TODO : remplacer les paramètres de cette méthode par des cartes
     public void shootFromCardsDeckClass(ComputerLayer targetLayer1, int damage1/*, ComputerLayer targetLayer2, int damage2*/)
     {
         if (!isLocalPlayer)
@@ -143,7 +151,7 @@ public class PlayerController : NetworkBehaviour
     }
 
 
-    [Command]
+    [Command] //TODO : remplacer les paramètres de cette méthode par des cartes et vérifier dans la méthodes si ce sont des cartes d'attaques
     public void CmdFire(ComputerLayer targetLayer1, int damage1/*, ComputerLayer targetLayer2, int damage2*/)
     {
         var virus = (GameObject)Instantiate(virusPrefab, virusSpawn.position, virusSpawn.rotation);

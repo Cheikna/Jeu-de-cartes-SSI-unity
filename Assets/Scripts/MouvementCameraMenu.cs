@@ -47,7 +47,7 @@ public class MouvementCameraMenu : MonoBehaviour {
 
     IEnumerator WaitFewSeconds()
     {
-        yield return new WaitForSeconds(2);
+        yield return new WaitForSeconds(1.5f);
         SceneManager.LoadScene("Lobby");
     }
 }
