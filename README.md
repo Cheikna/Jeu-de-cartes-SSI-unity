@@ -30,3 +30,9 @@ Access denied
 
 Access granted :
 - By Adelson Raimundo Reis Amaral [CC BY-SA 4.0  (https://creativecommons.org/licenses/by-sa/4.0)], from Wikimedia Commons
+
+Rideau :
+- https://www.turbosquid.com/FullPreview/Index.cfm/ID/1034276
+
+Machine à sous :
+- https://www.turbosquid.com/3d-models/3d-arcade-machine-1212120
