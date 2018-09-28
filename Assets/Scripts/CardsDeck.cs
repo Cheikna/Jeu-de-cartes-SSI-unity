@@ -82,7 +82,7 @@ public class CardsDeck : MonoBehaviour {
         /*cardsDeck.RemoveAt(indexOfCard);
         numberOfCards--;*/
         showCardInformations();
-        GetComponentInParent<PlayerController>().shootFromCardsDeckClass(card.touchedLayer, card.getDamage());
+        GetComponentInParent<PlayerController>().shootFromCardsDeckClass(card);
         GetComponentInParent<PlayerController>().CmdNextPlayerToPlay();
     }
 

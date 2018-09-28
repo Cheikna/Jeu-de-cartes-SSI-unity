@@ -115,18 +115,19 @@ public class PlayerController : NetworkBehaviour
     [Command]
     public void CmdNextPlayerToPlay()
     {
+        if (!doItOnce)
+        {
+            playersInGame = new List<GameObject>(GameObject.FindGameObjectsWithTag("player"));
+            doItOnce = true;
+
+        }
         RpcServerChoosesWhoPlays();
     }
 
     [ClientRpc]
     public void RpcServerChoosesWhoPlays()
     {
-        if(!doItOnce)
-        {
-            playersInGame = new List<GameObject>(GameObject.FindGameObjectsWithTag("player"));
-            doItOnce = true;
-
-        }
+        
         //if(isServer)
         // {
         if (indexPlayerWhoPlays >= playersInGame.Count)
@@ -140,14 +141,14 @@ public class PlayerController : NetworkBehaviour
         indexPlayerWhoPlays += 1;
         //}
     }
-
-    //TODO : remplacer les paramètres de cette méthode par des cartes
-    public void shootFromCardsDeckClass(ComputerLayer targetLayer1, int damage1/*, ComputerLayer targetLayer2, int damage2*/)
+    
+    public void shootFromCardsDeckClass(Card card1/*, ComputerLayer targetLayer2, int damage2*/)
     {
         if (!isLocalPlayer)
             return;
 
-        CmdFire(targetLayer1, damage1);
+        if(card1.isAttackCard)
+            CmdFire(card1.touchedLayer, card1.getDamage());
     }
 
 

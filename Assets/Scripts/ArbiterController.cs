@@ -12,6 +12,7 @@ public class ArbiterController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+        cardsDeck = new CardsDeck();
         players = new List<GameObject>();
 	}
 	
