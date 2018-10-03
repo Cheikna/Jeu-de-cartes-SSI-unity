@@ -197,11 +197,6 @@ Prefab:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 114462186347105934, guid: c1c6cee10a4e56146a3ec5d613d790a5,
-        type: 2}
-      propertyPath: m_SpawnPrefabs.Array.size
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 224612834258470366, guid: c1c6cee10a4e56146a3ec5d613d790a5,
         type: 2}
       propertyPath: m_LocalPosition.x
@@ -297,17 +292,6 @@ Prefab:
       propertyPath: m_Text
       value: 
       objectReference: {fileID: 0}
-    - target: {fileID: 114201336622327340, guid: c1c6cee10a4e56146a3ec5d613d790a5,
-        type: 2}
-      propertyPath: m_Text
-      value: SALLE D'ATTENTE
-      objectReference: {fileID: 0}
-    - target: {fileID: 114462186347105934, guid: c1c6cee10a4e56146a3ec5d613d790a5,
-        type: 2}
-      propertyPath: m_SpawnPrefabs.Array.data[0]
-      value: 
-      objectReference: {fileID: 1855932497947246, guid: a11bec7919f80444384e308a88ac4bb6,
-        type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c1c6cee10a4e56146a3ec5d613d790a5, type: 2}
   m_IsPrefabAsset: 0

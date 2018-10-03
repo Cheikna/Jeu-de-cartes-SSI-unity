@@ -33,7 +33,8 @@ public class ComputerHealth : NetworkBehaviour {
         oneLife = softwareHealthBar.sizeDelta.x / softwareMaxHealth;
     }
     
-    public void takeDamage(ComputerLayer touchedLayer, int amount)
+    
+    public void setHealth(ComputerLayer touchedLayer, int amount, bool isCardDecreaseHealth = true)
     {
         if (!isServer)
             return;
@@ -42,15 +43,24 @@ public class ComputerHealth : NetworkBehaviour {
         switch (touchedLayer)
         {
             case ComputerLayer.OS:
-                currentOsHealth -= amount;
+                if(isCardDecreaseHealth)
+                    currentOsHealth -= amount;
+                else
+                    currentOsHealth = updateIfItIsOverTheMaximumHealth(currentOsHealth + amount);
                 break;
 
             case ComputerLayer.SOFTWARE:
-                currentSofwareHealth -= amount;
+                if (isCardDecreaseHealth)
+                    currentSofwareHealth -= amount;
+                else
+                    currentSofwareHealth = updateIfItIsOverTheMaximumHealth(currentSofwareHealth + amount);
                 break;
 
             case ComputerLayer.HARDWARE:
-                currentHardwareHealth -= amount;
+                if (isCardDecreaseHealth)
+                    currentHardwareHealth -= amount;
+                else
+                    currentHardwareHealth = updateIfItIsOverTheMaximumHealth(currentHardwareHealth + amount);
                 break;
         }        
 
@@ -66,9 +76,13 @@ public class ComputerHealth : NetworkBehaviour {
         if (remainingLife <= 0)
         {
             Debug.Log("La partie est terminée, une équipe a perdu");
-            //PlayerController.isGameOver = true;
         }
             
+    }
+
+    public int updateIfItIsOverTheMaximumHealth(int health)
+    {
+        return (health > 6) ? 6 : health;
     }
 
 

@@ -1,0 +1,2 @@
+- Lorsque le client appuye sur confimer pour confirmer la carte à lancer, la balle n'est pas lancée
+Solutions : vérifier si la variable "carte" dans la méthode CmdFire est bien instanciée

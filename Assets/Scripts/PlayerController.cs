@@ -7,12 +7,24 @@ using UnityEngine.UI;
 public class PlayerController : NetworkBehaviour
 {
     List<GameObject> playersInGame;
+    [SerializeField]
+    private GameObject arbiterControllerGameObject;
+    ArbiterController arbiter;
     public bool isItMyTurn { get; set; }
-    public bool isItMyTurn2;
     public bool isGameOver { get; set; }
-    bool doItOnce = false;
+    //bool doItOnce = false;
+    public bool areAllCardsDistributed { get; set; }
+    bool areAllPlayersHere = false;
     int indexPlayerWhoPlays = 0;
-
+    List<Card> myCardsDeck = new List<Card>();
+    [SerializeField]
+    TemporaryCardsDeck tempCardsDeck;
+    
+    public int numberOfPlayersInTheGame { get; set; }
+    [SerializeField]
+    private TurnsFollower turnsFollower;
+    [SerializeField]
+    private CardsDeck cardsDeckScriptFromThePlayer;
     [SerializeField]
     private Canvas isItMyTurnCanvas;
     [SerializeField]
@@ -45,49 +57,82 @@ public class PlayerController : NetworkBehaviour
     #endregion
 
 
+    IEnumerator WaitFewSecondsBeforeDistribuingCards()
+    {
+        yield return new WaitForSeconds(1.5f);
+
+        if(hasAuthority)
+            CmdCardDistributionFromPlayer();
+
+        turnsFollower.gameObject.SetActive(true);
+    }
+
     // Use this for initialization
     void Start()
     {
+        areAllCardsDistributed = false;
+        numberOfPlayersInTheGame = Prototype.NetworkLobby.LobbyPlayerList.numberOfPlayerInTheRoom;
+        playersInGame = new List<GameObject>(GameObject.FindGameObjectsWithTag("player"));
         if (isServer)
         {
-            playersInGame = new List<GameObject>();
-            //playersInGame = new List<GameObject>(GameObject.FindGameObjectsWithTag("player"));
+            StartCoroutine(WaitFewSecondsBeforeDistribuingCards());
         }
             
         if(isLocalPlayer)
         {
+            
             //permet d'afficher uniquement ceux qui appartient au joueur local
             playerElements.SetActive(true);
+
             isItMyTurn = false;
             isGameOver = false;
 
-            Button[] playerButtons = GetComponentsInChildren<Button>();
-            // Trouver tous les boutons du joueur
-            foreach (Button btn in playerButtons)
-            {
-                string tag = btn.tag;
-
-                switch (tag)
-                {
-                    case "femaleCharacterButton":
-                        femaleCharacterButton = btn;
-                        femaleCharacterButton.onClick.AddListener(delegate { CmdChooseCharacter("female"); });
-                        break;
-
-                    case "maleCharacterButton":
-                        maleCharacterButton = btn;
-                        maleCharacterButton.onClick.AddListener(delegate { CmdChooseCharacter("male"); });
-                        break;
-                }
-            }
-
-            showMyCardsCanvas.gameObject.SetActive(false);
-            mainCanvas.gameObject.SetActive(false);
-            chooseCharacterCanvas.gameObject.SetActive(true);
-            healthCanvas.gameObject.SetActive(false);
-            isItMyTurnCanvas.gameObject.SetActive(false);
-
+            addPossibilityToChooseCharacterButtons();
+            deactivateAllUselessCanvasForTheBeginning();
         }
+        
+    }
+
+    void addPossibilityToChooseCharacterButtons()
+    {
+        Button[] playerButtons = GetComponentsInChildren<Button>();
+        // Trouver tous les boutons du joueur
+        foreach (Button btn in playerButtons)
+        {
+            string tag = btn.tag;
+
+            switch (tag)
+            {
+                case "femaleCharacterButton":
+                    femaleCharacterButton = btn;
+                    femaleCharacterButton.onClick.AddListener(delegate { CmdChooseCharacter("female"); });
+                    break;
+
+                case "maleCharacterButton":
+                    maleCharacterButton = btn;
+                    maleCharacterButton.onClick.AddListener(delegate { CmdChooseCharacter("male"); });
+                    break;
+            }
+        }
+    }
+
+    void deactivateAllUselessCanvasForTheBeginning()
+    {
+        showMyCardsCanvas.gameObject.SetActive(false);
+        mainCanvas.gameObject.SetActive(false);
+        chooseCharacterCanvas.gameObject.SetActive(true);
+        healthCanvas.gameObject.SetActive(false);
+        isItMyTurnCanvas.gameObject.SetActive(false);
+    }
+
+    public void addCardToMyDeck(Card card)
+    {
+        if(isLocalPlayer)
+        {
+            if (card != null)
+                tempCardsDeck.addCard(card);
+        }
+            
     }
 
     // Update is called once per frame
@@ -96,7 +141,6 @@ public class PlayerController : NetworkBehaviour
         if (!isLocalPlayer)
             return;
 
-        isItMyTurn2 = isItMyTurn;
         //TODO add a blinking effect texte (effet clignotement)
         if (isItMyTurn)
         {
@@ -112,64 +156,130 @@ public class PlayerController : NetworkBehaviour
 
     }
 
-    [Command]
-    public void CmdNextPlayerToPlay()
-    {
-        if (!doItOnce)
-        {
+    void getAllOfThePlayersInAList()
+    {        
+        
+        if (playersInGame.Count != numberOfPlayersInTheGame)
             playersInGame = new List<GameObject>(GameObject.FindGameObjectsWithTag("player"));
-            doItOnce = true;
 
-        }
-        RpcServerChoosesWhoPlays();
+        arbiter = arbiterControllerGameObject.GetComponent<ArbiterController>();
+        arbiter.numberOfPlayersInTheGame = Prototype.NetworkLobby.LobbyPlayerList.numberOfPlayerInTheRoom;
+        arbiter.distributeCards(playersInGame);
+
+        areAllPlayersHere = true;
+        if(hasAuthority)
+            CmdNextPlayerToPlay();
+    }
+
+    [Command]
+    public void CmdCardDistributionFromPlayer()
+    {
+        RpcServerDistributeCards();
     }
 
     [ClientRpc]
+    public void RpcServerDistributeCards()
+    {
+        getAllOfThePlayersInAList();
+    }
+
+    [Command]
+    public void CmdNextPlayerToPlay()
+    {        
+        turnsFollower.RpcChooseNextPlayer();
+    }
+
+    /*[ClientRpc]
     public void RpcServerChoosesWhoPlays()
     {
-        
-        //if(isServer)
-        // {
+        playersInGame = new List<GameObject>(GameObject.FindGameObjectsWithTag("player"));
         if (indexPlayerWhoPlays >= playersInGame.Count)
             indexPlayerWhoPlays = 0;
         foreach(GameObject player in playersInGame)
         {
             player.GetComponent<PlayerController>().isItMyTurn = false;
         }
-        Debug.Log("Numéro du joueur qui doit jouer : " + indexPlayerWhoPlays);
         playersInGame[indexPlayerWhoPlays].GetComponent<PlayerController>().isItMyTurn = true;
         indexPlayerWhoPlays += 1;
-        //}
-    }
-    
-    public void shootFromCardsDeckClass(Card card1/*, ComputerLayer targetLayer2, int damage2*/)
+    }*/
+
+    public void play()
     {
         if (!isLocalPlayer)
             return;
 
-        if(card1.isAttackCard)
-            CmdFire(card1.touchedLayer, card1.getDamage());
+        GetComponent<PlayerController>().isItMyTurn = true;
+    }
+
+    public void doNotPlay()
+    {
+        if (!isLocalPlayer)
+            return;
+
+        GetComponent<PlayerController>().isItMyTurn = false;
     }
 
 
-    [Command] //TODO : remplacer les paramètres de cette méthode par des cartes et vérifier dans la méthodes si ce sont des cartes d'attaques
-    public void CmdFire(ComputerLayer targetLayer1, int damage1/*, ComputerLayer targetLayer2, int damage2*/)
+    public void shootFromCardsDeckClass(string[] cardPlayedInfos)
     {
-        var virus = (GameObject)Instantiate(virusPrefab, virusSpawn.position, virusSpawn.rotation);
-        var virusEffects = virus.GetComponent<VirusController>();
-        virusEffects.targetLayer1 = targetLayer1;
-        virusEffects.damageLayer1 = damage1;
+        if (!isLocalPlayer)
+            return;
 
-        /*if (damage2 != 0)
+        //L'attribut card n'est pas passé en paramètre car cela engendre des problèmes lorsque que l'on tente d'instancier des balles sur les clients
+        //De plus, on ne peut passer des objets (ex: Card) en paramètre pour les fonctions Command (s'éxécutant sur les clients)
+        CmdFire(cardPlayedInfos);
+        CmdNextPlayerToPlay();
+    }
+
+
+    [Command]
+    public void CmdFire(string[] cardPlayedInfos)
+    {
+
+        bool isAttakCard = (cardPlayedInfos[3].ToUpper() == "TRUE") ? true : false;
+        ComputerLayer touchedLayer = ComputerLayer.HARDWARE;
+        int touchedLayerString = int.Parse(cardPlayedInfos[5]);
+        if (touchedLayerString == 0)
+            touchedLayer = ComputerLayer.SOFTWARE;
+        else if (touchedLayerString == 2)
+            touchedLayer = ComputerLayer.OS;
+
+
+        Card cardPlayedByThePlayer = new Card(cardPlayedInfos[0],
+                                              cardPlayedInfos[1],
+                                              cardPlayedInfos[2],
+                                              isAttakCard,
+                                              touchedLayer,
+                                              int.Parse(cardPlayedInfos[5]),
+                                              new Color(int.Parse(cardPlayedInfos[6]), int.Parse(cardPlayedInfos[7]), int.Parse(cardPlayedInfos[8]))                                              
+                                              );
+
+
+        if (cardPlayedByThePlayer.isAttackCard)
         {
-            virusEffects.targetLayer2 = targetLayer2;
-            virusEffects.damageLayer2 = damage2;
-        }*/
-        virus.GetComponent<Rigidbody>().velocity = virus.transform.forward * 6;
+            var virus = (GameObject)Instantiate(virusPrefab, virusSpawn.position, virusSpawn.rotation);
+            var virusEffects = virus.GetComponent<VirusController>();
+            virusEffects.targetLayer1 = cardPlayedByThePlayer.touchedLayer;
+            virusEffects.damageLayer1 = cardPlayedByThePlayer.getDamage();
 
-        //faire apparaitre la balle sur les clients
-        NetworkServer.Spawn(virus);
-        Destroy(virus, 5.0f);
+            //Changer la couleur de la balle pour qu'elle soit de la même couleur que la carte
+            Renderer[] rends = virus.GetComponentsInChildren<Renderer>();
+            foreach (Renderer r in rends)
+                r.material.color = cardPlayedByThePlayer.getCardColor();
+            
+            virus.GetComponent<Rigidbody>().velocity = virus.transform.forward * 6;
+
+            //faire apparaitre la balle sur les clients
+            NetworkServer.Spawn(virus);
+            //Faire disparaitre la balle au bout de 5sec pour éviter une surcharge des ressources
+            Destroy(virus, 5.0f);
+
+        }
+        // Si la carte n'est pas une carte d'attaque alors c'est une carte qui nous rajoute des points
+        else if (!cardPlayedByThePlayer.isAttackCard)
+        {
+            GetComponent<ComputerHealth>().setHealth(cardPlayedByThePlayer.touchedLayer, cardPlayedByThePlayer.getDamage(), false);
+        }
     }
 
     [Command]
@@ -182,9 +292,6 @@ public class PlayerController : NetworkBehaviour
     [ClientRpc]
     public void RpcUpdateChooseCharacter(string character)
     {
-        /*if (!isLocalPlayer)
-            return;*/
-
         if (character == "female")
         {
             maleCharacter.gameObject.SetActive(false);
@@ -202,7 +309,7 @@ public class PlayerController : NetworkBehaviour
         chooseCharacterCanvas.gameObject.SetActive(false);
         healthCanvas.gameObject.SetActive(true);
         isItMyTurnCanvas.gameObject.SetActive(true);
-        CmdNextPlayerToPlay();
+        //CmdNextPlayerToPlay();
     }
 
     public void hideMyCards()

@@ -22,9 +22,9 @@ public class VirusController : MonoBehaviour {
         {
             // Vérifier si ce sont des cartes d'attaques et non des cartes rajoutant des point de vie au joueur
             if(!targetLayer1.Equals(null) && damageLayer1 > 0)
-                computerHealth.takeDamage(targetLayer1, damageLayer1);
+                computerHealth.setHealth(targetLayer1, damageLayer1);
             if (!targetLayer2.Equals(null) && damageLayer2 > 0)
-                computerHealth.takeDamage(targetLayer2, damageLayer2);
+                computerHealth.setHealth(targetLayer2, damageLayer2);
 
         }
 

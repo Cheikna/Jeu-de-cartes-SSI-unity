@@ -19,6 +19,7 @@ TagManager:
   - maleCharacterButton
   - playerElements
   - player
+  - arbiter
   layers:
   - Default
   - TransparentFX

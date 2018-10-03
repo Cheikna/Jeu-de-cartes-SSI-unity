@@ -17,8 +17,11 @@ namespace Prototype.NetworkLobby
         protected VerticalLayoutGroup _layout;
         protected List<LobbyPlayer> _players = new List<LobbyPlayer>();
 
+        public static int numberOfPlayerInTheRoom { get; set; }
+
         public void OnEnable()
         {
+            numberOfPlayerInTheRoom = 0;
             _instance = this;
             _layout = playerListContentTransform.GetComponent<VerticalLayoutGroup>();
         }
@@ -65,6 +68,8 @@ namespace Prototype.NetworkLobby
                 p.OnPlayerListChanged(i);
                 ++i;
             }
+
+            numberOfPlayerInTheRoom = _players.Count;
         }
     }
 }

@@ -14,9 +14,4 @@ public class PlayerConnected : MonoBehaviour {
 	void Update () {
 		
 	}
-
-    void OnPlayerConnected(NetworkIdentity player)
-    {
-        Debug.Log("Nouveau joueur");
-    }
 }

@@ -22,6 +22,10 @@ public class Card {
     public string definition { get; set; }
     public string action { get; set; }
 
+    private float redColor;
+    private float greenColor;
+    private float blueColor;
+
     public Card(string name, string definition, string action, bool isAttackCard, ComputerLayer touchedLayer, int damage, Color cardColor)
     {
         this.name = name.ToUpper();
@@ -29,21 +33,23 @@ public class Card {
         this.action = action;
         this.isAttackCard = isAttackCard;
         this.damage = damage;
+        //Permet de s'assurer que l'on ne s'est pas trompé lors de la déclaration du nombre de dégâts
+        setDamage(this.damage);
         this.cardColor = cardColor;
         this.touchedLayer = touchedLayer;
 
+        redColor = cardColor.r;
+        greenColor = cardColor.g;
+        blueColor = cardColor.b;
+
     }
+
+    public Card() { }
 
     public Color getCardColor()
     {
         return cardColor;
     }
-
-    /*public void setCardColor(float r, float v, float b)
-    {
-        cardColor = new Color(r, v, b);
-
-    }*/
 
     public void setDamage(int damage)
     {
@@ -54,6 +60,26 @@ public class Card {
     public int getDamage()
     {        
         return damage;
+    }
+
+    public string[] getCardinfosInAStringArray()
+    {
+        string[] tabInfos = new string[9];
+        tabInfos[0] = name;
+        tabInfos[1] = definition;
+        tabInfos[2] = action;
+        tabInfos[3] = isAttackCard.ToString();
+        tabInfos[4] = touchedLayer.ToString();
+        tabInfos[5] = damage.ToString();
+        tabInfos[6] = redColor.ToString();
+        tabInfos[7] = greenColor.ToString();
+        tabInfos[8] = blueColor.ToString();
+        return tabInfos;
+    }
+
+    public string splitCardToStringIntoInfos(string infos)
+    {
+        return "test";
     }
 
 
