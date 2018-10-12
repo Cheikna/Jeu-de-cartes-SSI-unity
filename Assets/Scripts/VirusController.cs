@@ -13,12 +13,25 @@ public class VirusController : MonoBehaviour {
 
     public ComputerLayer targetLayer2 { get; set; }
     public int damageLayer2 { get; set; }
+    public PlayerController playerWhoFiredTheVirus { get; set; }
 
     void OnCollisionEnter(Collision collision)
-    {
+    {        
         var computerHit = collision.gameObject;
         var computerHealth = computerHit.GetComponent<ComputerHealth>();
-        if(computerHealth != null)
+        var playerController = computerHit.GetComponent<PlayerController>();
+
+        // Récupération du joueur qui a instancié le virus, celui qui en est à l'origine afin de dire qu'il vient de jouer
+        if (playerWhoFiredTheVirus != null)
+            playerWhoFiredTheVirus.setIsItMyTurnHook(false);
+
+
+        if(playerController != null)
+        {
+            playerController.setIsItMyTurnHook(true);
+        }
+        
+        if (computerHealth != null)
         {
             // Vérifier si ce sont des cartes d'attaques et non des cartes rajoutant des point de vie au joueur
             if(!targetLayer1.Equals(null) && damageLayer1 > 0)

@@ -102,7 +102,7 @@ public class CardsDeck : MonoBehaviour {
 
     public void passMyTurn()
     {
-        GetComponentInParent<PlayerController>().CmdNextPlayerToPlay();
+        GetComponentInParent<PlayerController>().setIsItMyTurnHook(false);
     }
 
     public void onClickNextCard()
