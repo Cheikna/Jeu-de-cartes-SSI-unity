@@ -6,11 +6,11 @@ using UnityEngine.UI;
 
 public class PlayerController : NetworkBehaviour
 {
+
     List<GameObject> playersInGame;
     [SerializeField]
     private GameObject arbiterControllerGameObject;
     ArbiterController arbiter;
-    public bool isItMyTurn { get; set; }
     public bool isGameOver { get; set; }
     //bool doItOnce = false;
     public bool areAllCardsDistributed { get; set; }
@@ -57,6 +57,9 @@ public class PlayerController : NetworkBehaviour
     #endregion
 
 
+    [SyncVar]
+    public bool isItMyTurnHook = false;
+
     IEnumerator WaitFewSecondsBeforeDistribuingCards()
     {
         yield return new WaitForSeconds(1.5f);
@@ -84,13 +87,29 @@ public class PlayerController : NetworkBehaviour
             //permet d'afficher uniquement ceux qui appartient au joueur local
             playerElements.SetActive(true);
 
-            isItMyTurn = false;
             isGameOver = false;
 
             addPossibilityToChooseCharacterButtons();
             deactivateAllUselessCanvasForTheBeginning();
         }
         
+    }
+
+    public void onChangeIsItMyTurnHook()
+    {
+
+    }
+
+    public void setIsItMyTurnHook(bool isItMyTurnHook)
+    {
+        if (!isServer)
+            return;
+        this.isItMyTurnHook = isItMyTurnHook;
+    }
+
+    public bool getIsItMyTurnHook()
+    {
+        return isItMyTurnHook;
     }
 
     void addPossibilityToChooseCharacterButtons()
@@ -141,8 +160,7 @@ public class PlayerController : NetworkBehaviour
         if (!isLocalPlayer)
             return;
 
-        //TODO add a blinking effect texte (effet clignotement)
-        if (isItMyTurn)
+        if (isItMyTurnHook)
         {
             isItMyTurnText.text = "A votre tour de jouer";
             confirmCardButton.interactable = true;
@@ -151,7 +169,6 @@ public class PlayerController : NetworkBehaviour
         {
             isItMyTurnText.text = "Au tour de l'adversaire !";
             confirmCardButton.interactable = false;
-
         }
 
     }
@@ -167,8 +184,8 @@ public class PlayerController : NetworkBehaviour
         arbiter.distributeCards(playersInGame);
 
         areAllPlayersHere = true;
-        if(hasAuthority)
-            CmdNextPlayerToPlay();
+        /*if(hasAuthority)
+            CmdNextPlayerToPlay();*/
     }
 
     [Command]
@@ -183,42 +200,6 @@ public class PlayerController : NetworkBehaviour
         getAllOfThePlayersInAList();
     }
 
-    [Command]
-    public void CmdNextPlayerToPlay()
-    {        
-        turnsFollower.RpcChooseNextPlayer();
-    }
-
-    /*[ClientRpc]
-    public void RpcServerChoosesWhoPlays()
-    {
-        playersInGame = new List<GameObject>(GameObject.FindGameObjectsWithTag("player"));
-        if (indexPlayerWhoPlays >= playersInGame.Count)
-            indexPlayerWhoPlays = 0;
-        foreach(GameObject player in playersInGame)
-        {
-            player.GetComponent<PlayerController>().isItMyTurn = false;
-        }
-        playersInGame[indexPlayerWhoPlays].GetComponent<PlayerController>().isItMyTurn = true;
-        indexPlayerWhoPlays += 1;
-    }*/
-
-    public void play()
-    {
-        if (!isLocalPlayer)
-            return;
-
-        GetComponent<PlayerController>().isItMyTurn = true;
-    }
-
-    public void doNotPlay()
-    {
-        if (!isLocalPlayer)
-            return;
-
-        GetComponent<PlayerController>().isItMyTurn = false;
-    }
-
 
     public void shootFromCardsDeckClass(string[] cardPlayedInfos)
     {
@@ -228,7 +209,7 @@ public class PlayerController : NetworkBehaviour
         //L'attribut card n'est pas passé en paramètre car cela engendre des problèmes lorsque que l'on tente d'instancier des balles sur les clients
         //De plus, on ne peut passer des objets (ex: Card) en paramètre pour les fonctions Command (s'éxécutant sur les clients)
         CmdFire(cardPlayedInfos);
-        CmdNextPlayerToPlay();
+        //CmdNextPlayerToPlay();
     }
 
 
@@ -261,6 +242,7 @@ public class PlayerController : NetworkBehaviour
             var virusEffects = virus.GetComponent<VirusController>();
             virusEffects.targetLayer1 = cardPlayedByThePlayer.touchedLayer;
             virusEffects.damageLayer1 = cardPlayedByThePlayer.getDamage();
+            virusEffects.playerWhoFiredTheVirus = this;
 
             //Changer la couleur de la balle pour qu'elle soit de la même couleur que la carte
             Renderer[] rends = virus.GetComponentsInChildren<Renderer>();
