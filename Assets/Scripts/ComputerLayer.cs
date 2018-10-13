@@ -5,7 +5,7 @@ using System.Text;
 
 public enum ComputerLayer
 {
-    SOFTWARE,
-    HARDWARE,
-    OS   
+    SOFTWARE = 0,
+    HARDWARE = 1,
+    OS = 2   
 }
