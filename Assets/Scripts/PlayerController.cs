@@ -12,7 +12,6 @@ public class PlayerController : NetworkBehaviour
     private GameObject arbiterControllerGameObject;
     ArbiterController arbiter;
     public bool isGameOver { get; set; }
-    //bool doItOnce = false;
     public bool areAllCardsDistributed { get; set; }
     bool areAllPlayersHere = false;
     int indexPlayerWhoPlays = 0;
@@ -58,7 +57,7 @@ public class PlayerController : NetworkBehaviour
 
 
     [SyncVar]
-    public bool isItMyTurnHook = false;
+    private bool isItMyTurnHook = false;
 
     IEnumerator WaitFewSecondsBeforeDistribuingCards()
     {
@@ -184,8 +183,6 @@ public class PlayerController : NetworkBehaviour
         arbiter.distributeCards(playersInGame);
 
         areAllPlayersHere = true;
-        /*if(hasAuthority)
-            CmdNextPlayerToPlay();*/
     }
 
     [Command]
@@ -209,7 +206,6 @@ public class PlayerController : NetworkBehaviour
         //L'attribut card n'est pas passé en paramètre car cela engendre des problèmes lorsque que l'on tente d'instancier des balles sur les clients
         //De plus, on ne peut passer des objets (ex: Card) en paramètre pour les fonctions Command (s'éxécutant sur les clients)
         CmdFire(cardPlayedInfos);
-        //CmdNextPlayerToPlay();
     }
 
 
@@ -219,10 +215,11 @@ public class PlayerController : NetworkBehaviour
 
         bool isAttakCard = (cardPlayedInfos[3].ToUpper() == "TRUE") ? true : false;
         ComputerLayer touchedLayer = ComputerLayer.HARDWARE;
-        int touchedLayerString = int.Parse(cardPlayedInfos[5]);
-        if (touchedLayerString == 0)
+        Debug.Log("int touched lay String : " + cardPlayedInfos[4]);
+        string touchedLayerString = cardPlayedInfos[4].ToUpper();
+        if (touchedLayerString == "SOFTWARE")
             touchedLayer = ComputerLayer.SOFTWARE;
-        else if (touchedLayerString == 2)
+        else if (touchedLayerString == "OS")
             touchedLayer = ComputerLayer.OS;
 
 
@@ -291,7 +288,6 @@ public class PlayerController : NetworkBehaviour
         chooseCharacterCanvas.gameObject.SetActive(false);
         healthCanvas.gameObject.SetActive(true);
         isItMyTurnCanvas.gameObject.SetActive(true);
-        //CmdNextPlayerToPlay();
     }
 
     public void hideMyCards()

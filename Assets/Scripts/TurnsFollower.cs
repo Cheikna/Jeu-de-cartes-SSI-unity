@@ -28,7 +28,6 @@ public class TurnsFollower : NetworkBehaviour {
         PlayerController p;
         foreach (var pair in playersDico)
         {
-            Debug.Log(pair.Key + " --" + pair.Value);
             if (pair.Value.name == "Player(Clone)")
             {
                 currentNumberOfPlayers++;
@@ -36,9 +35,7 @@ public class TurnsFollower : NetworkBehaviour {
                 players.Add(p);
             }
         }
-        Debug.Log("nombre de joueurs : " + players.Count);
         players[0].setIsItMyTurnHook(true);
-        //CmdChooseNextPlayer();
     }
 
     
@@ -51,16 +48,11 @@ public class TurnsFollower : NetworkBehaviour {
     public void RpcChooseNextPlayer()
     {        
         indexPlayerWhoPlays += 1;
-        Debug.Log("RpcChooseNextPlayer()");
         if (indexPlayerWhoPlays >= currentNumberOfPlayers)
             indexPlayerWhoPlays = 0;
 
         players[indexPlayerWhoPlays].setIsItMyTurnHook(true);
-        currentPlayer = players[indexPlayerWhoPlays];
-
-        Debug.Log("Joueur : " + indexPlayerWhoPlays);
-
-        
+        currentPlayer = players[indexPlayerWhoPlays];        
     }
 
     IEnumerator WaitBeforeChangingPlayer()
