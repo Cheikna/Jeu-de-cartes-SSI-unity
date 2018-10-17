@@ -58,6 +58,16 @@ public class PlayerController : NetworkBehaviour
 
     [SyncVar]
     private bool isItMyTurnHook = false;
+    [SyncVar]
+    public string playerName = "";
+    [SyncVar]
+    private bool isWhiteHat = false;
+    [SyncVar]
+    private int positionX =0;
+    [SyncVar]
+    private int positionY = 0;
+    [SyncVar]
+    private int positionZ = 0;
 
     IEnumerator WaitFewSecondsBeforeDistribuingCards()
     {
@@ -82,7 +92,6 @@ public class PlayerController : NetworkBehaviour
             
         if(isLocalPlayer)
         {
-            
             //permet d'afficher uniquement ceux qui appartient au joueur local
             playerElements.SetActive(true);
 
@@ -308,5 +317,45 @@ public class PlayerController : NetworkBehaviour
         mainCanvas.gameObject.SetActive(false);
     }
 
+
+    public string getPlayerName()
+    {
+        return playerName;
+    }
+
+    public void setPlayerName(string newPlayerName)
+    {
+        playerName = newPlayerName;
+    }
+
+    public int getPositionX()
+    {
+        return positionX;
+    }
+
+    public void setPositionX(int x)
+    {
+        this.positionX = x;
+    }
+
+    public int getPositionY()
+    {
+        return positionY;
+    }
+
+    public void setPositionY(int y)
+    {
+        this.positionY = y;
+    }
+
+    public int getPositionZ()
+    {
+        return positionZ;
+    }
+
+    public void setPositionZ(int z)
+    {
+        this.positionZ = z;
+    }
 
 }

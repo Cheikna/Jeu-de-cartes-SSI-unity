@@ -1044,6 +1044,7 @@ GameObject:
   - component: {fileID: 114825146856265640}
   - component: {fileID: 114462186347105934}
   - component: {fileID: 114168033493983000}
+  - component: {fileID: 114488994217149188}
   m_Layer: 5
   m_Name: LobbyManagerFrench
   m_TagString: Untagged
@@ -2390,7 +2391,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 127.0.0.
+  m_Text: 127.0.0.1
 --- !u!114 &114337154469964382
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2886,6 +2887,17 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: Input name...
+--- !u!114 &114488994217149188
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1934280371086784}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e1054ea55016e94a9e0fab6e51bcc44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &114569154497095368
 MonoBehaviour:
   m_ObjectHideFlags: 1
