@@ -647,6 +647,10 @@ Prefab:
       propertyPath: m_RootOrder
       value: 5
       objectReference: {fileID: 0}
+    - target: {fileID: 1925972491572990, guid: b5e1d9e1e0c88b54cb8391de82ae06ff, type: 2}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b5e1d9e1e0c88b54cb8391de82ae06ff, type: 2}
   m_IsPrefabAsset: 0
@@ -1063,14 +1067,15 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1200076578}
+  - component: {fileID: 1200076580}
   - component: {fileID: 1200076579}
   m_Layer: 0
-  m_Name: Scripts
+  m_Name: Server
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1200076578
 Transform:
   m_ObjectHideFlags: 0
@@ -1092,9 +1097,43 @@ MonoBehaviour:
   m_GameObject: {fileID: 1200076577}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9506a953387a80d44b90e1e2db96b658, type: 3}
+  m_Script: {fileID: 372142912, guid: dc443db3e92b4983b9738c1131f555cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SceneId:
+    m_Value: 0
+  m_AssetId:
+    i0: 0
+    i1: 0
+    i2: 0
+    i3: 0
+    i4: 0
+    i5: 0
+    i6: 0
+    i7: 0
+    i8: 0
+    i9: 0
+    i10: 0
+    i11: 0
+    i12: 0
+    i13: 0
+    i14: 0
+    i15: 0
+  m_ServerOnly: 1
+  m_LocalPlayerAuthority: 0
+--- !u!114 &1200076580
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1200076577}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8657e5c24783cfe428cae53a7bc2ddcf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  team1Text: {fileID: 0}
+  team2Text: {fileID: 0}
 --- !u!1 &1225189308
 GameObject:
   m_ObjectHideFlags: 0

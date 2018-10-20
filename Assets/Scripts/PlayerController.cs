@@ -3,23 +3,34 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
+using System.Text.RegularExpressions;
 
 public class PlayerController : NetworkBehaviour
 {
 
     List<GameObject> playersInGame;
-    [SerializeField]
-    private GameObject arbiterControllerGameObject;
     ArbiterController arbiter;
-    public bool isGameOver { get; set; }
-    public bool areAllCardsDistributed { get; set; }
     bool areAllPlayersHere = false;
     int indexPlayerWhoPlays = 0;
     List<Card> myCardsDeck = new List<Card>();
-    [SerializeField]
-    TemporaryCardsDeck tempCardsDeck;
-    
+
+    string hatColor = "";
+    bool teamChanged = false;
+
+
+    #region variables getters;setters
+    public bool isGameOver { get; set; }
+    public bool areAllCardsDistributed { get; set; }
     public int numberOfPlayersInTheGame { get; set; }
+    public string team1Members { get; set; }
+    public string team2members { get; set; }
+    #endregion
+
+    #region SerializeField - permet d'attribuer des valeurs à ces atttributs via Unity directement
+    [SerializeField]
+    private GameObject arbiterControllerGameObject;
+    [SerializeField]
+    TemporaryCardsDeck tempCardsDeck;    
     [SerializeField]
     private TurnsFollower turnsFollower;
     [SerializeField]
@@ -30,13 +41,17 @@ public class PlayerController : NetworkBehaviour
     private Text isItMyTurnText;
     [SerializeField]
     private Button confirmCardButton;
-
     [SerializeField]
     private GameObject virusPrefab;
     [SerializeField]
     private Transform virusSpawn;
     [SerializeField]
     private GameObject playerElements;
+    [SerializeField]
+    private Text team1MembersText;
+    [SerializeField]
+    private Text team2MembersText;
+    #endregion
 
     #region Bouton & Canvas
     [SerializeField]
@@ -51,15 +66,17 @@ public class PlayerController : NetworkBehaviour
     private Component femaleCharacter;
     [SerializeField]
     private Component maleCharacter;
+    [SerializeField]
+    private Canvas chooseMyTeam;
     private Button femaleCharacterButton;
     private Button maleCharacterButton;
     #endregion
 
-
+    #region SynVars
     [SyncVar]
     private bool isItMyTurnHook = false;
     [SyncVar]
-    public string playerName = "";
+    private string playerName = "";
     [SyncVar]
     private bool isWhiteHat = false;
     [SyncVar]
@@ -68,6 +85,15 @@ public class PlayerController : NetworkBehaviour
     private int positionY = 0;
     [SyncVar]
     private int positionZ = 0;
+    [SyncVar]
+    public int teamNumber = 0;
+
+    private string regexTeam = "<regexTeam>";
+    private string regexNewPlayer = "<regexNewPlayer>";
+    // teamsMembers = "name1" + regexTeam  + "team1" + regexNewPlayer + "name2" + regexTeam  + "team2" ;
+    [SyncVar]    
+    public string teamsMembers = "";
+    #endregion
 
     IEnumerator WaitFewSecondsBeforeDistribuingCards()
     {
@@ -99,6 +125,12 @@ public class PlayerController : NetworkBehaviour
 
             addPossibilityToChooseCharacterButtons();
             deactivateAllUselessCanvasForTheBeginning();
+
+            if(teamChanged)
+            {
+                updateTeamMembersText();
+                teamChanged = false;
+            }
         }
         
     }
@@ -145,9 +177,9 @@ public class PlayerController : NetworkBehaviour
 
     void deactivateAllUselessCanvasForTheBeginning()
     {
+        chooseCharacterCanvas.gameObject.SetActive(false);
         showMyCardsCanvas.gameObject.SetActive(false);
         mainCanvas.gameObject.SetActive(false);
-        chooseCharacterCanvas.gameObject.SetActive(true);
         healthCanvas.gameObject.SetActive(false);
         isItMyTurnCanvas.gameObject.SetActive(false);
     }
@@ -165,8 +197,13 @@ public class PlayerController : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (isServer)
+            updateTeamMembersText();
+
         if (!isLocalPlayer)
             return;
+
+        Debug.Log("mon numéro d'équipe : " + teamNumber);
 
         if (isItMyTurnHook)
         {
@@ -356,6 +393,128 @@ public class PlayerController : NetworkBehaviour
     public void setPositionZ(int z)
     {
         this.positionZ = z;
+    }
+
+    public int getTeamNumber()
+    {
+        return teamNumber;
+    }
+
+    [Command]
+    public void CmdSetTeamNumber(string teamNumberString)
+    {
+        teamNumber = int.Parse(teamNumberString);
+        /*if(isServer)
+            RpcSetTeamNumber(teamNumber);*/
+    }
+
+
+    public void setTeamNumber(string teamNumberString)
+    {
+        if(isServer)
+            teamNumber = int.Parse(teamNumberString);
+
+        if (!isLocalPlayer)
+            return;
+        teamNumber = int.Parse(teamNumberString);
+    }
+
+    [ClientRpc]
+    public void RpcSetTeamNumber(int teamNumber)
+    {
+        this.teamNumber = teamNumber;       
+
+    }
+
+    public void updateTeamMembersText()
+    {
+        
+        List<PlayerController> players = new List<PlayerController>();
+        Dictionary<NetworkInstanceId, NetworkIdentity> playersDico = NetworkServer.objects;
+        PlayerController p;
+        foreach (var pair in playersDico)
+        {
+            if (pair.Value.name == "Player(Clone)")
+            {
+                p = pair.Value.gameObject.GetComponent<PlayerController>();
+                players.Add(p);
+            }
+        }
+        
+        string playersRepartitionInTeams = "";
+
+        foreach (PlayerController player in players)
+        {
+            playersRepartitionInTeams += player.getPlayerName() + regexTeam + player.getTeamNumber() + regexNewPlayer;
+            Debug.Log("Nom du joueur : " + player.getPlayerName() + " --- Equipe : " + player.getTeamNumber());
+        }
+
+        foreach (PlayerController player in players)
+        {
+            player.setTeamsMembers(playersRepartitionInTeams);
+        }
+
+
+        setTeamsMembersTexts();
+    }
+
+    public void setTeamsMembersTexts()
+    {
+        // teamsMembers = "name1" + regexTeam  + "team1" + regexNewPlayer + "name2" + regexTeam  + "team2" + regexNewPlayer ;
+        string playersInTeam1 = "";
+        string playersInTeam2 = "";
+
+        string[] playersWithTeams = Regex.Split(teamsMembers, regexNewPlayer);
+        foreach(string playerWithTeam in playersWithTeams)
+        {
+            if(playersWithTeams != null && playersWithTeams.Length > 1)
+            {
+                string[] playerWithTeamSplit = Regex.Split(playerWithTeam, regexTeam);
+                string playerName = playerWithTeamSplit[0];
+                string team = playerWithTeamSplit[1];
+                if(team == "1")
+                {
+                    playersInTeam1 += "- " + playerName + "\n";
+                }
+                else if (team == "2")
+                {
+                    playersInTeam2 += "- " + playerName + "\n";
+                }
+            }
+        }
+
+        team1MembersText.text = playersInTeam1;
+        team2MembersText.text = playersInTeam2;
+    }
+
+
+
+    public string getHatColor()
+    {
+        return hatColor;
+    }
+
+    [Command]
+    public void CmdSetHatColor(string hatColor)
+    {
+        RpcSetHatColor(hatColor);
+    }
+
+    [ClientRpc]
+    public void RpcSetHatColor(string hatColor)
+    {
+        this.hatColor = hatColor;
+
+    }
+
+    public string getTeamsMembers()
+    {
+        return teamsMembers;
+    }
+
+    public void setTeamsMembers(string teamsMembers)
+    {
+        this.teamsMembers = teamsMembers;
     }
 
 }
