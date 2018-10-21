@@ -70,6 +70,8 @@ public class PlayerController : NetworkBehaviour
     private Canvas chooseMyTeam;
     private Button femaleCharacterButton;
     private Button maleCharacterButton;
+    private Button chooseTeam1Button;
+    private Button chooseTeam2Button;
     #endregion
 
     #region SynVars
@@ -88,8 +90,8 @@ public class PlayerController : NetworkBehaviour
     [SyncVar]
     public int teamNumber = 0;
 
-    private string regexTeam = "<regexTeam>";
-    private string regexNewPlayer = "<regexNewPlayer>";
+    private char regexTeam = '>';
+    private char regexNewPlayer = '&';
     // teamsMembers = "name1" + regexTeam  + "team1" + regexNewPlayer + "name2" + regexTeam  + "team2" ;
     [SyncVar]    
     public string teamsMembers = "";
@@ -171,6 +173,16 @@ public class PlayerController : NetworkBehaviour
                     maleCharacterButton = btn;
                     maleCharacterButton.onClick.AddListener(delegate { CmdChooseCharacter("male"); });
                     break;
+
+                case "chooseTeam1Button":
+                    chooseTeam1Button = btn;
+                    chooseTeam1Button.onClick.AddListener(delegate { CmdSetTeamNumber(1); });
+                    break;
+
+                case "chooseTeam2Button":
+                    chooseTeam2Button = btn;
+                    chooseTeam2Button.onClick.AddListener(delegate { CmdSetTeamNumber(2); });
+                    break;
             }
         }
     }
@@ -203,7 +215,7 @@ public class PlayerController : NetworkBehaviour
         if (!isLocalPlayer)
             return;
 
-        Debug.Log("mon numéro d'équipe : " + teamNumber);
+        setTeamsMembersTexts();
 
         if (isItMyTurnHook)
         {
@@ -401,11 +413,9 @@ public class PlayerController : NetworkBehaviour
     }
 
     [Command]
-    public void CmdSetTeamNumber(string teamNumberString)
+    public void CmdSetTeamNumber(int teamNumber)
     {
-        teamNumber = int.Parse(teamNumberString);
-        /*if(isServer)
-            RpcSetTeamNumber(teamNumber);*/
+        RpcSetTeamNumber(teamNumber);
     }
 
 
@@ -446,16 +456,12 @@ public class PlayerController : NetworkBehaviour
         foreach (PlayerController player in players)
         {
             playersRepartitionInTeams += player.getPlayerName() + regexTeam + player.getTeamNumber() + regexNewPlayer;
-            Debug.Log("Nom du joueur : " + player.getPlayerName() + " --- Equipe : " + player.getTeamNumber());
         }
 
         foreach (PlayerController player in players)
         {
             player.setTeamsMembers(playersRepartitionInTeams);
         }
-
-
-        setTeamsMembersTexts();
     }
 
     public void setTeamsMembersTexts()
@@ -464,22 +470,27 @@ public class PlayerController : NetworkBehaviour
         string playersInTeam1 = "";
         string playersInTeam2 = "";
 
-        string[] playersWithTeams = Regex.Split(teamsMembers, regexNewPlayer);
+        string[] playersWithTeams = teamsMembers.Split(regexNewPlayer);
         foreach(string playerWithTeam in playersWithTeams)
         {
             if(playersWithTeams != null && playersWithTeams.Length > 1)
             {
-                string[] playerWithTeamSplit = Regex.Split(playerWithTeam, regexTeam);
-                string playerName = playerWithTeamSplit[0];
-                string team = playerWithTeamSplit[1];
-                if(team == "1")
+                string[] playerWithTeamSplit = playerWithTeam.Split(regexTeam);
+                if(playerWithTeamSplit.Length >= 2)
                 {
-                    playersInTeam1 += "- " + playerName + "\n";
+                    string playerName = playerWithTeamSplit[0];
+                    string team = playerWithTeamSplit[1];
+                    if (team == "1")
+                    {
+                        playersInTeam1 += "- " + playerName + "\n";
+                    }
+                    else if (team == "2")
+                    {
+                        playersInTeam2 += "- " + playerName + "\n";
+                    }
+
                 }
-                else if (team == "2")
-                {
-                    playersInTeam2 += "- " + playerName + "\n";
-                }
+                
             }
         }
 
