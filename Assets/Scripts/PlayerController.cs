@@ -8,14 +8,17 @@ using System.Text.RegularExpressions;
 public class PlayerController : NetworkBehaviour
 {
 
-    List<GameObject> playersInGame;
+    List<GameObject> playersInGame = new List<GameObject>();
     ArbiterController arbiter;
     bool areAllPlayersHere = false;
     int indexPlayerWhoPlays = 0;
     List<Card> myCardsDeck = new List<Card>();
 
     string hatColor = "";
-    bool teamChanged = false;
+    const int maxNumberOfPlayersPerTeam = 1;
+    int numberOfPeopleInTeam1 = 0;
+    int numberOfPeopleInTeam2 = 0;
+
 
 
     #region variables getters;setters
@@ -51,9 +54,21 @@ public class PlayerController : NetworkBehaviour
     private Text team1MembersText;
     [SerializeField]
     private Text team2MembersText;
+    [SerializeField]
+    private Transform positionCenterTeam1;
+    [SerializeField]
+    private Transform positionCenterTeam2;
+    [SerializeField]
+    private Transform position1;
+    [SerializeField]
+    private Transform position2;
+    [SerializeField]
+    private Transform position3;
+    [SerializeField]
+    private Transform position4;
     #endregion
 
-    #region Bouton & Canvas
+    #region Bouton & Canvas [SerializedField]
     [SerializeField]
     private Canvas showMyCardsCanvas;
     [SerializeField]
@@ -67,11 +82,15 @@ public class PlayerController : NetworkBehaviour
     [SerializeField]
     private Component maleCharacter;
     [SerializeField]
-    private Canvas chooseMyTeam;
+    private Canvas chooseTeamCanvas;
+    #endregion
+
+    #region Boutons auxquels on doit rajouter des fonctionnalités
     private Button femaleCharacterButton;
     private Button maleCharacterButton;
     private Button chooseTeam1Button;
     private Button chooseTeam2Button;
+    private Button teamChoosedButton;
     #endregion
 
     #region SynVars
@@ -82,19 +101,16 @@ public class PlayerController : NetworkBehaviour
     [SyncVar]
     private bool isWhiteHat = false;
     [SyncVar]
-    private int positionX =0;
+    private int teamNumber = 0;
     [SyncVar]
-    private int positionY = 0;
-    [SyncVar]
-    private int positionZ = 0;
-    [SyncVar]
-    public int teamNumber = 0;
-
+    private Transform myPosition;
     private char regexTeam = '>';
     private char regexNewPlayer = '&';
     // teamsMembers = "name1" + regexTeam  + "team1" + regexNewPlayer + "name2" + regexTeam  + "team2" ;
     [SyncVar]    
     public string teamsMembers = "";
+    [SyncVar]
+    bool teamChoosed = false;
     #endregion
 
     IEnumerator WaitFewSecondsBeforeDistribuingCards()
@@ -125,21 +141,16 @@ public class PlayerController : NetworkBehaviour
 
             isGameOver = false;
 
-            addPossibilityToChooseCharacterButtons();
+            addPossibilityToChooseTeamButtons();
             deactivateAllUselessCanvasForTheBeginning();
 
-            if(teamChanged)
+            /*if(teamChanged)
             {
                 updateTeamMembersText();
                 teamChanged = false;
-            }
+            }*/
         }
         
-    }
-
-    public void onChangeIsItMyTurnHook()
-    {
-
     }
 
     public void setIsItMyTurnHook(bool isItMyTurnHook)
@@ -154,26 +165,16 @@ public class PlayerController : NetworkBehaviour
         return isItMyTurnHook;
     }
 
-    void addPossibilityToChooseCharacterButtons()
+    void addPossibilityToChooseTeamButtons()
     {
         Button[] playerButtons = GetComponentsInChildren<Button>();
-        // Trouver tous les boutons du joueur
+        // Trouver tous les boutons actifs du joueur
         foreach (Button btn in playerButtons)
         {
             string tag = btn.tag;
 
             switch (tag)
             {
-                case "femaleCharacterButton":
-                    femaleCharacterButton = btn;
-                    femaleCharacterButton.onClick.AddListener(delegate { CmdChooseCharacter("female"); });
-                    break;
-
-                case "maleCharacterButton":
-                    maleCharacterButton = btn;
-                    maleCharacterButton.onClick.AddListener(delegate { CmdChooseCharacter("male"); });
-                    break;
-
                 case "chooseTeam1Button":
                     chooseTeam1Button = btn;
                     chooseTeam1Button.onClick.AddListener(delegate { CmdSetTeamNumber(1); });
@@ -183,12 +184,19 @@ public class PlayerController : NetworkBehaviour
                     chooseTeam2Button = btn;
                     chooseTeam2Button.onClick.AddListener(delegate { CmdSetTeamNumber(2); });
                     break;
+
+                case "teamChoosedButton":
+                    teamChoosedButton = btn;
+                    teamChoosedButton.onClick.AddListener(delegate { CmdTeamChoosed(); });
+                    teamChoosedButton.interactable = false;
+                    break;
             }
         }
     }
 
     void deactivateAllUselessCanvasForTheBeginning()
     {
+        chooseTeamCanvas.gameObject.SetActive(true);
         chooseCharacterCanvas.gameObject.SetActive(false);
         showMyCardsCanvas.gameObject.SetActive(false);
         mainCanvas.gameObject.SetActive(false);
@@ -210,12 +218,18 @@ public class PlayerController : NetworkBehaviour
     void Update()
     {
         if (isServer)
-            updateTeamMembersText();
+        {
+            if(!teamChoosed)
+                updateTeamMembersText();
+
+        }
+            
 
         if (!isLocalPlayer)
             return;
 
-        setTeamsMembersTexts();
+        if(!teamChoosed)
+            setTeamsMembersTexts();
 
         if (isItMyTurnHook)
         {
@@ -320,6 +334,97 @@ public class PlayerController : NetworkBehaviour
     }
 
     [Command]
+    public void CmdTeamChoosed()
+    {
+        RpcTeamChoosed();
+    }
+
+    [ClientRpc]
+    public void RpcTeamChoosed()
+    {
+        setMyPosition();
+        chooseTeamCanvas.gameObject.SetActive(false);
+        chooseCharacterCanvas.gameObject.SetActive(true);
+        showMyCardsCanvas.gameObject.SetActive(false);
+        mainCanvas.gameObject.SetActive(false);
+        healthCanvas.gameObject.SetActive(false);
+        isItMyTurnCanvas.gameObject.SetActive(false);
+        teamChoosed = true;
+
+        // Possibilité de choisir un joueur après avoir choisit son équipe
+        Button[] playerButtons = GetComponentsInChildren<Button>();
+        // Trouver tous les boutons du joueur
+        foreach (Button btn in playerButtons)
+        {
+            string tag = btn.tag;
+            Debug.Log(tag);
+
+            switch (tag)
+            {
+                case "femaleCharacterButton":
+                    femaleCharacterButton = btn;
+                    femaleCharacterButton.onClick.AddListener(delegate { CmdChooseCharacter("female"); });
+                    break;
+
+                case "maleCharacterButton":
+                    maleCharacterButton = btn;
+                    maleCharacterButton.onClick.AddListener(delegate { CmdChooseCharacter("male"); });
+                    break;
+            }
+        }
+    }
+
+    public void setMyPosition()
+    {
+        //Pour connaitre notre equipe, on peut utiliser : teamsMembers = "name1" + regexTeam  + "team1" + regexNewPlayer + "name2" + regexTeam  + "team2" ;
+        /* On split au niveau du regexNewPlayer, on regarde la taille et si la taille est de 2 alors le premier joueur est de l'équipe 1
+         *  et le deuxième joueur est de l'équipe 2. Sinon si la taille est de 4 alors les deux premiers joueurs sont de l'équipe 1
+         *  et les deux derniers de l'équipe 2. On peut l'affirmer car les joueurs sont triés en fonction de leurs équipes.
+         *  Enfin pour chaque case on verifie si elle contient le nom du joueur et si c'est le cas l'index de la case (+1 car les index commencent à 0)
+         *  devient le numéro de la position du joueur
+         */
+
+        string[] playersWithTeams = teamsMembers.Split(regexNewPlayer);
+        // On fait -1 car à la fin il reste un regexnewPlayer tout seul
+        int arrayLength = playersWithTeams.Length - 1;
+        Transform myFuturePosition = null;
+
+
+        //Si on est de l'équipe 1, nos positions possible sont position1 et position2
+        //Si on est de l'équipe 2, nos positions possible sont position3 et position4
+        if (arrayLength == 2)
+        {
+            if (teamNumber == 1)
+                myFuturePosition = positionCenterTeam1;
+            else if (teamNumber == 2)
+                myFuturePosition = positionCenterTeam2;
+        }
+        else // si c'est égale à 4
+        {
+            if(teamNumber == 1)
+            {
+                //Les cases 0 et 1 pour l'équipe 1 et les cases 2 et 3 pour l'équipe 2
+                if (playersWithTeams[0].Contains(playerName))
+                    myFuturePosition = position1;
+                else
+                    myFuturePosition = position2;
+            }
+            else if (teamNumber == 2)
+            {
+                if (playersWithTeams[2].Contains(playerName))
+                    myFuturePosition = position3;
+                else
+                    myFuturePosition = position4;
+
+            }
+        }
+
+        transform.position = myFuturePosition.position;
+        transform.rotation = myFuturePosition.rotation;
+
+    }
+
+    [Command]
     public void CmdChooseCharacter(string character)
     {
         RpcUpdateChooseCharacter(character);
@@ -377,36 +482,6 @@ public class PlayerController : NetworkBehaviour
         playerName = newPlayerName;
     }
 
-    public int getPositionX()
-    {
-        return positionX;
-    }
-
-    public void setPositionX(int x)
-    {
-        this.positionX = x;
-    }
-
-    public int getPositionY()
-    {
-        return positionY;
-    }
-
-    public void setPositionY(int y)
-    {
-        this.positionY = y;
-    }
-
-    public int getPositionZ()
-    {
-        return positionZ;
-    }
-
-    public void setPositionZ(int z)
-    {
-        this.positionZ = z;
-    }
-
     public int getTeamNumber()
     {
         return teamNumber;
@@ -452,11 +527,22 @@ public class PlayerController : NetworkBehaviour
         }
         
         string playersRepartitionInTeams = "";
+        // Ces 2 variables permettront d'avoir en sortie d'abord les joueurs de lé'équipe 1 puis ceux de l'équipe 2
+        string playersInTeam1 = "";
+        string playersInTeam2 = "";
+        int team = 0;
 
         foreach (PlayerController player in players)
         {
-            playersRepartitionInTeams += player.getPlayerName() + regexTeam + player.getTeamNumber() + regexNewPlayer;
+            team = player.getTeamNumber();
+            if(team == 1)
+                playersInTeam1 += player.getPlayerName() + regexTeam + team + regexNewPlayer;
+            else if(team == 2)
+                playersInTeam2 += player.getPlayerName() + regexTeam + team + regexNewPlayer;
         }
+
+        playersRepartitionInTeams += playersInTeam1 + playersInTeam2;
+        Debug.Log(playersRepartitionInTeams);
 
         foreach (PlayerController player in players)
         {
@@ -469,6 +555,8 @@ public class PlayerController : NetworkBehaviour
         // teamsMembers = "name1" + regexTeam  + "team1" + regexNewPlayer + "name2" + regexTeam  + "team2" + regexNewPlayer ;
         string playersInTeam1 = "";
         string playersInTeam2 = "";
+        numberOfPeopleInTeam1 = 0;
+        numberOfPeopleInTeam2 = 0;
 
         string[] playersWithTeams = teamsMembers.Split(regexNewPlayer);
         foreach(string playerWithTeam in playersWithTeams)
@@ -483,16 +571,23 @@ public class PlayerController : NetworkBehaviour
                     if (team == "1")
                     {
                         playersInTeam1 += "- " + playerName + "\n";
+                        numberOfPeopleInTeam1++;
                     }
                     else if (team == "2")
                     {
                         playersInTeam2 += "- " + playerName + "\n";
+                        numberOfPeopleInTeam2++;
                     }
 
                 }
                 
             }
         }
+
+        if (numberOfPeopleInTeam1 == maxNumberOfPlayersPerTeam && numberOfPeopleInTeam2 == maxNumberOfPlayersPerTeam)
+            teamChoosedButton.interactable = true;
+        else
+            teamChoosedButton.interactable = false;
 
         team1MembersText.text = playersInTeam1;
         team2MembersText.text = playersInTeam2;
