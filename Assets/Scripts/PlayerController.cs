@@ -386,10 +386,7 @@ public class PlayerController : NetworkBehaviour
         string[] playersWithTeams = teamsMembers.Split(regexNewPlayer);
         // On fait -1 car à la fin il reste un regexnewPlayer tout seul
         int arrayLength = playersWithTeams.Length - 1;
-
-        Debug.Log("array length l.391 : " + arrayLength);
         Transform myFuturePosition = null;
-
 
         //Si on est de l'équipe 1, nos positions possible sont position1 et position2
         //Si on est de l'équipe 2, nos positions possible sont position3 et position4

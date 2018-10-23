@@ -17,9 +17,9 @@ public class VirusController : MonoBehaviour {
     int teamNumberOfTheTouchedPlayer = 0;
 
 
-    //TODO à remplacer par un OnTriggerEnter afin de prendre en compte le fait que les boxCollider soient superposées
-    void OnCollisionEnter(Collision collision)
-    {        
+    
+    void OnTriggerEnter(Collider collision)
+    {
         var computerHit = collision.gameObject;
         var computerHealth = computerHit.GetComponent<ComputerHealth>();
         var playerController = computerHit.GetComponent<PlayerController>();
