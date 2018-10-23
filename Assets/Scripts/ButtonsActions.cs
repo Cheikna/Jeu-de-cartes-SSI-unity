@@ -27,7 +27,7 @@ public class ButtonsActions : MonoBehaviour {
 
 
     // Use this for initialization
-    /*void Start () {
+    void Start () {
 
 
     }
@@ -43,5 +43,5 @@ public class ButtonsActions : MonoBehaviour {
 
         showMyCardsCanvas.gameObject.SetActive(true);
         mainCanvas.gameObject.SetActive(false);
-    }*/
+    }
 }

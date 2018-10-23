@@ -14,12 +14,9 @@ public class VirusController : MonoBehaviour {
     public ComputerLayer targetLayer2 { get; set; }
     public int damageLayer2 { get; set; }
     public PlayerController playerWhoFiredTheVirus { get; set; }
-    int teamNumberOfTheTouchedPlayer = 0;
 
-
-    
-    void OnTriggerEnter(Collider collision)
-    {
+    void OnCollisionEnter(Collision collision)
+    {        
         var computerHit = collision.gameObject;
         var computerHealth = computerHit.GetComponent<ComputerHealth>();
         var playerController = computerHit.GetComponent<PlayerController>();
@@ -32,14 +29,6 @@ public class VirusController : MonoBehaviour {
         if(playerController != null)
         {
             playerController.setIsItMyTurnHook(true);
-            playerController.CmdActivateIsMyTurnHookOfPeopleofMyTeam();
-            /*teamNumberOfTheTouchedPlayer = playerController.getTeamNumber();
-
-            // On met à jour les dégats de tous les joueurs de la même équipe
-            if(teamNumberOfTheTouchedPlayer != 0)
-            {
-
-            }*/
         }
         
         if (computerHealth != null)
@@ -53,6 +42,6 @@ public class VirusController : MonoBehaviour {
         }
 
         
-        Destroy(gameObject, 7.0f);
+        Destroy(gameObject);
     }
 }

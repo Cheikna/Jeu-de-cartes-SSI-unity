@@ -20,11 +20,6 @@ TagManager:
   - playerElements
   - player
   - arbiter
-  - team1MembersText
-  - team2MembersText
-  - chooseTeam1Button
-  - chooseTeam2Button
-  - teamChoosedButton
   layers:
   - Default
   - TransparentFX
