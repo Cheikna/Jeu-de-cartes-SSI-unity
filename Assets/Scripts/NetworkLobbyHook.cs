@@ -10,8 +10,8 @@ public class NetworkLobbyHook : LobbyHook {
     {
         LobbyPlayer lobby = lobbyPlayer.GetComponent<LobbyPlayer>();
         PlayerController localPlayer = gamePlayer.GetComponent<PlayerController>();
-
-        localPlayer.setPlayerName(lobby.playerName);
+        string playerNameInLobby = lobby.playerName.Replace('>', '-').Replace('&', '-');
+        localPlayer.setPlayerName(playerNameInLobby);
         
     }
 }

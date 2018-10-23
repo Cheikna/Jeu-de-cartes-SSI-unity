@@ -12,10 +12,8 @@ public class PlayerController : NetworkBehaviour
     ArbiterController arbiter;
     bool areAllPlayersHere = false;
     int indexPlayerWhoPlays = 0;
-    List<Card> myCardsDeck = new List<Card>();
-
-    string hatColor = "";
-    const int maxNumberOfPlayersPerTeam = 1;
+    List<Card> myCardsDeck = new List<Card>();    
+    const int minNumberOfPlayersPerTeam = 1;
     int numberOfPeopleInTeam1 = 0;
     int numberOfPeopleInTeam2 = 0;
 
@@ -100,6 +98,8 @@ public class PlayerController : NetworkBehaviour
     private string playerName = "";
     [SyncVar]
     private bool isWhiteHat = false;
+    [SyncVar]
+    string hatColor = "";
     [SyncVar]
     private int teamNumber = 0;
     [SyncVar]
@@ -357,7 +357,6 @@ public class PlayerController : NetworkBehaviour
         foreach (Button btn in playerButtons)
         {
             string tag = btn.tag;
-            Debug.Log(tag);
 
             switch (tag)
             {
@@ -387,12 +386,14 @@ public class PlayerController : NetworkBehaviour
         string[] playersWithTeams = teamsMembers.Split(regexNewPlayer);
         // On fait -1 car à la fin il reste un regexnewPlayer tout seul
         int arrayLength = playersWithTeams.Length - 1;
+
+        Debug.Log("array length l.391 : " + arrayLength);
         Transform myFuturePosition = null;
 
 
         //Si on est de l'équipe 1, nos positions possible sont position1 et position2
         //Si on est de l'équipe 2, nos positions possible sont position3 et position4
-        if (arrayLength == 2)
+        if (arrayLength <= 2)
         {
             if (teamNumber == 1)
                 myFuturePosition = positionCenterTeam1;
@@ -419,8 +420,11 @@ public class PlayerController : NetworkBehaviour
             }
         }
 
-        transform.position = myFuturePosition.position;
-        transform.rotation = myFuturePosition.rotation;
+        if(myFuturePosition != null)
+        {
+            transform.position = myFuturePosition.position;
+            transform.rotation = myFuturePosition.rotation;
+        }
 
     }
 
@@ -542,7 +546,6 @@ public class PlayerController : NetworkBehaviour
         }
 
         playersRepartitionInTeams += playersInTeam1 + playersInTeam2;
-        Debug.Log(playersRepartitionInTeams);
 
         foreach (PlayerController player in players)
         {
@@ -584,7 +587,7 @@ public class PlayerController : NetworkBehaviour
             }
         }
 
-        if (numberOfPeopleInTeam1 == maxNumberOfPlayersPerTeam && numberOfPeopleInTeam2 == maxNumberOfPlayersPerTeam)
+        if (numberOfPeopleInTeam1 >= minNumberOfPlayersPerTeam && numberOfPeopleInTeam1 == numberOfPeopleInTeam2)
             teamChoosedButton.interactable = true;
         else
             teamChoosedButton.interactable = false;
