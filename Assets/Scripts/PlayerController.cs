@@ -626,4 +626,26 @@ public class PlayerController : NetworkBehaviour
         this.teamsMembers = teamsMembers;
     }
 
+    [Command]
+    public void CmdActivateIsMyTurnHookOfPeopleofMyTeam()
+    {
+        RpcActivateIsMyTurnHookOfPeopleofMyTeam();
+    }
+
+    [ClientRpc]
+    public void RpcActivateIsMyTurnHookOfPeopleofMyTeam()
+    {
+        Dictionary<NetworkInstanceId, NetworkIdentity> playersDico = NetworkServer.objects;
+        PlayerController p;
+        foreach (var pair in playersDico)
+        {
+            if (pair.Value.name == "Player(Clone)")
+            {
+                p = pair.Value.gameObject.GetComponent<PlayerController>();
+                if (p.getTeamNumber() == teamNumber)
+                    p.setIsItMyTurnHook(true);
+            }
+        }
+        
+    }
 }
