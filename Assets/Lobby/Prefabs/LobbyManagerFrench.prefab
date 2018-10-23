@@ -1044,6 +1044,7 @@ GameObject:
   - component: {fileID: 114825146856265640}
   - component: {fileID: 114462186347105934}
   - component: {fileID: 114168033493983000}
+  - component: {fileID: 114488994217149188}
   m_Layer: 5
   m_Name: LobbyManagerFrench
   m_TagString: Untagged
@@ -2390,7 +2391,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 127.0.0.
+  m_Text: 127.0.0.1
 --- !u!114 &114337154469964382
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2786,7 +2787,7 @@ MonoBehaviour:
   isNetworkActive: 0
   matchMaker: {fileID: 0}
   m_ShowLobbyGUI: 0
-  m_MaxPlayers: 2
+  m_MaxPlayers: 4
   m_MaxPlayersPerConnection: 1
   m_MinPlayers: 1
   m_LobbyPlayerPrefab: {fileID: 11487034, guid: ad727d7e1462ecc4f83c898ecc501997,
@@ -2885,7 +2886,6 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Nom de la partie...
 --- !u!114 &114569154497095368
 MonoBehaviour:
   m_ObjectHideFlags: 1
