@@ -64,7 +64,7 @@ namespace Prototype.NetworkLobby
 
             DontDestroyOnLoad(gameObject);
 
-            SetServerInfo("Hors-ligne", "Aucun");
+            SetServerInfo("Offline", "None");
         }
 
         public override void OnLobbyClientSceneChanged(NetworkConnection conn)
@@ -138,7 +138,7 @@ namespace Prototype.NetworkLobby
             else
             {
                 backButton.gameObject.SetActive(false);
-                SetServerInfo("Hors-ligne", "Aucun");
+                SetServerInfo("Offline", "None");
                 _isMatchmaking = false;
             }
         }
@@ -146,7 +146,7 @@ namespace Prototype.NetworkLobby
         public void DisplayIsConnecting()
         {
             var _this = this;
-            infoPanel.Display("Connexion...", "Annuler", () => { _this.backDelegate(); });
+            infoPanel.Display("Connecting...", "Cancel", () => { _this.backDelegate(); });
         }
 
         public void SetServerInfo(string status, string host)
@@ -226,7 +226,7 @@ namespace Prototype.NetworkLobby
 
         public void KickedMessageHandler(NetworkMessage netMsg)
         {
-            infoPanel.Display("Ejecte par le serveur", "Close", null);
+            infoPanel.Display("Kicked by Server", "Close", null);
             netMsg.conn.Disconnect();
         }
 
@@ -238,7 +238,7 @@ namespace Prototype.NetworkLobby
 
             ChangeTo(lobbyPanel);
             backDelegate = StopHostClbk;
-            SetServerInfo("HEBERGEMENT", networkAddress);
+            SetServerInfo("Hosting", networkAddress);
         }
 
 		public override void OnMatchCreate(bool success, string extendedInfo, MatchInfo matchInfo)
