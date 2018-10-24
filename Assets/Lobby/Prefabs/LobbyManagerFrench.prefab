@@ -130,7 +130,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &1100129524911250
 GameObject:
   m_ObjectHideFlags: 1
@@ -670,7 +670,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &1590091850968380
 GameObject:
   m_ObjectHideFlags: 1
@@ -1320,7 +1320,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: NEXT
+  m_Text: SUIVANT
 --- !u!114 &114067872162079174
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1386,7 +1386,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Enter an address
+  m_Text: Entrez une adresse
 --- !u!114 &114075754672712054
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1419,7 +1419,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 0
-  m_Text: 'Status:'
+  m_Text: 'Statut:'
 --- !u!114 &114079417032676860
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1452,7 +1452,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: PREVIOUS
+  m_Text: PRECEDENT
 --- !u!114 &114095169697081340
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1675,7 +1675,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 0
-  m_Text: MATCHMAKER
+  m_Text: CREER DES PARTIES
 --- !u!114 &114126657336062812
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1940,7 +1940,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: OR
+  m_Text: OU
 --- !u!114 &114201287520421066
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2000,7 +2000,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 0
-  m_Text: WAITING ROOM
+  m_Text: SALON
 --- !u!114 &114219878873691736
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2060,7 +2060,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 0
-  m_Text: SLOTS
+  m_Text: JOUEUR
 --- !u!114 &114231067709894482
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2213,7 +2213,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: BACK
+  m_Text: RETOUR
 --- !u!114 &114288340828989230
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2325,7 +2325,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: LIST SERVERS
+  m_Text: LISTE DES SERVEURS
 --- !u!114 &114312313230640570
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2358,7 +2358,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: CREATE
+  m_Text: CREER
 --- !u!114 &114322845212110852
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2497,7 +2497,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: CONNECTING...
+  m_Text: CONNEXION...
 --- !u!114 &114394114652701688
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2676,7 +2676,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 0
-  m_Text: 'Host:'
+  m_Text: "H\xE9bergeur:"
 --- !u!114 &114450667631827326
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2886,7 +2886,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Input name...
+  m_Text: Nom de la partie...
 --- !u!114 &114488994217149188
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2957,7 +2957,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: JOIN
+  m_Text: REJOINDRE
 --- !u!114 &114583774810458888
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2990,7 +2990,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 0
-  m_Text: CREATE A GAME
+  m_Text: CREER UNE PARTIE
 --- !u!114 &114591689343837040
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3048,7 +3048,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: CONNECTING...
+  m_Text: CONNEXION...
 --- !u!114 &114636524989574514
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3197,7 +3197,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 0
-  m_Text: JOIN A GAME
+  m_Text: REJOINDRE UNE PARTIE
 --- !u!114 &114649632787973128
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3555,7 +3555,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 0
-  m_Text: START A GAME
+  m_Text: COMMENCER UNE PARTIE
 --- !u!114 &114780671144219840
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3588,9 +3588,8 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: 'This is a direct play server, it is not listed in "List servers"
-
-    Other players have to connect using your IP address'
+  m_Text: "Votre partie n'est pas list\xE9e dans la liste des serveurs. Les joueurs
+    devront utiliser l'adresse IP pour se connecter."
 --- !u!114 &114789597743245140
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3705,7 +3704,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 0
-  m_Text: MANUAL CONNECTION
+  m_Text: CONNEXION MANUELLE
 --- !u!114 &114845650712165038
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3738,9 +3737,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 0
-  m_Text: 'SERVER NAME
-
-'
+  m_Text: NOM DU SERVEUR
 --- !u!114 &114856813661776428
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3852,7 +3849,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: PLAY AND HOST
+  m_Text: JOUER ET HEBERGER
 --- !u!114 &114872199371415854
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3899,7 +3896,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: CANCEL
+  m_Text: ANNULER
 --- !u!114 &114944325597537234
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3959,7 +3956,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 0
-  m_Text: FIND A GAME
+  m_Text: TROUVER UNE PARTIE
 --- !u!114 &114991311093642976
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3992,7 +3989,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 0
-  m_Text: NO SERVERS FOUND
+  m_Text: AUCUN SERVEUR TROUVE
 --- !u!114 &114996087415206806
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4982,8 +4979,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 1039.3477, y: -50}
-  m_SizeDelta: {x: 2078.6953, y: 100}
+  m_AnchoredPosition: {x: 944, y: -50}
+  m_SizeDelta: {x: 1888, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224359427918685416
 RectTransform:
@@ -5152,8 +5149,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -302.5, y: 96.5}
-  m_SizeDelta: {x: 605, y: 193}
+  m_AnchoredPosition: {x: -321.7, y: 96.5}
+  m_SizeDelta: {x: 646.6, y: 193}
   m_Pivot: {x: 0, y: 1}
 --- !u!224 &224492750065176164
 RectTransform:
@@ -5252,7 +5249,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 593.5, y: -44}
+  m_AnchoredPosition: {x: 680, y: -44}
   m_SizeDelta: {x: 325, y: 24}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!224 &224584589954681006
@@ -5409,7 +5406,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
   m_AnchoredPosition: {x: 509, y: -44}
-  m_SizeDelta: {x: 84, y: 24}
+  m_SizeDelta: {x: 179.9, y: 24}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!224 &224640590423112982
 RectTransform:
