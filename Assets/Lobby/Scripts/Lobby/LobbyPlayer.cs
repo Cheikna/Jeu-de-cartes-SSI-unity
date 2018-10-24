@@ -112,12 +112,12 @@ namespace Prototype.NetworkLobby
 
             ChangeReadyButtonColor(JoinColor);
 
-            readyButton.transform.GetChild(0).GetComponent<Text>().text = "JOIN";
+            readyButton.transform.GetChild(0).GetComponent<Text>().text = "REJOINDRE";
             readyButton.interactable = true;
 
             //have to use child count of player prefab already setup as "this.slot" is not set yet
             if (playerName == "")
-                CmdNameChanged("Player" + (LobbyPlayerList._instance.playerListContentTransform.childCount-1));
+                CmdNameChanged("Joueur" + (LobbyPlayerList._instance.playerListContentTransform.childCount-1));
 
             //we switch from simple name display to name input
             colorButton.interactable = true;
@@ -157,7 +157,7 @@ namespace Prototype.NetworkLobby
                 ChangeReadyButtonColor(TransparentColor);
 
                 Text textComponent = readyButton.transform.GetChild(0).GetComponent<Text>();
-                textComponent.text = "READY";
+                textComponent.text = "PRET";
                 textComponent.color = ReadyColor;
                 readyButton.interactable = false;
                 colorButton.interactable = false;
@@ -168,7 +168,7 @@ namespace Prototype.NetworkLobby
                 ChangeReadyButtonColor(isLocalPlayer ? JoinColor : NotReadyColor);
 
                 Text textComponent = readyButton.transform.GetChild(0).GetComponent<Text>();
-                textComponent.text = isLocalPlayer ? "JOIN" : "...";
+                textComponent.text = isLocalPlayer ? "REJOINDRE" : "...";
                 textComponent.color = Color.white;
                 readyButton.interactable = isLocalPlayer;
                 colorButton.interactable = isLocalPlayer;
@@ -234,7 +234,7 @@ namespace Prototype.NetworkLobby
         [ClientRpc]
         public void RpcUpdateCountdown(int countdown)
         {
-            LobbyManager.s_Singleton.countdownPanel.UIText.text = "Match Starting in " + countdown;
+            LobbyManager.s_Singleton.countdownPanel.UIText.text = "Debut du match dans " + countdown;
             LobbyManager.s_Singleton.countdownPanel.gameObject.SetActive(countdown != 0);
         }
 
