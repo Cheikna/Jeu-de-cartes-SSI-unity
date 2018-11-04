@@ -26,13 +26,15 @@ public class VirusController : MonoBehaviour {
 
         // Récupération du joueur qui a instancié le virus, celui qui en est à l'origine afin de dire qu'il vient de jouer
         if (playerWhoFiredTheVirus != null)
+        {
             playerWhoFiredTheVirus.setIsItMyTurnHook(false);
+        }
+            
 
 
         if(playerController != null)
         {
             playerController.setIsItMyTurnHook(true);
-            playerController.CmdActivateIsMyTurnHookOfPeopleofMyTeam();
             /*teamNumberOfTheTouchedPlayer = playerController.getTeamNumber();
 
             // On met à jour les dégats de tous les joueurs de la même équipe

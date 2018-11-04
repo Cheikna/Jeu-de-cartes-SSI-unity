@@ -16,7 +16,7 @@ public class PlayerController : NetworkBehaviour
     const int minNumberOfPlayersPerTeam = 1;
     int numberOfPeopleInTeam1 = 0;
     int numberOfPeopleInTeam2 = 0;
-
+    public bool testMode = true;
 
 
     #region variables getters;setters
@@ -64,6 +64,8 @@ public class PlayerController : NetworkBehaviour
     private Transform position3;
     [SerializeField]
     private Transform position4;
+    [SerializeField]
+    private Text numberOfTurnsText;
     #endregion
 
     #region Bouton & Canvas [SerializedField]
@@ -81,6 +83,8 @@ public class PlayerController : NetworkBehaviour
     private Component maleCharacter;
     [SerializeField]
     private Canvas chooseTeamCanvas;
+    [SerializeField]
+    private Canvas numberOfTurnsCanvas;
     #endregion
 
     #region Boutons auxquels on doit rajouter des fonctionnalités
@@ -111,6 +115,20 @@ public class PlayerController : NetworkBehaviour
     public string teamsMembers = "";
     [SyncVar]
     bool teamChoosed = false;
+    //Permet de savoir l'ordre du joueur et si l'ordre est égal à 1, alors c'est ce joueur qui incrémentera le nombre de tours
+    [SyncVar]
+    int playerOrder = 0;
+    [SyncVar]
+    int numberOfTurns = 1;
+    const int maxNumberOfTurns = 24;
+    [SyncVar]
+    int numberOfBallsFired = 0; // Lorsque 2 balles sont lancées (c'est-à-dire que les 2 équipes ont lancé chacun une balle) alors cela signifie qu'il y a eu un tour
+    [SyncVar]
+    string allCardsTitleInString = "";
+    [SyncVar]
+    string allMyCardsTitleString = "";
+    [SyncVar]
+    string allTeamMateCardsString = "";
     #endregion
 
     IEnumerator WaitFewSecondsBeforeDistribuingCards()
@@ -143,12 +161,6 @@ public class PlayerController : NetworkBehaviour
 
             addPossibilityToChooseTeamButtons();
             deactivateAllUselessCanvasForTheBeginning();
-
-            /*if(teamChanged)
-            {
-                updateTeamMembersText();
-                teamChanged = false;
-            }*/
         }
         
     }
@@ -188,7 +200,8 @@ public class PlayerController : NetworkBehaviour
                 case "teamChoosedButton":
                     teamChoosedButton = btn;
                     teamChoosedButton.onClick.AddListener(delegate { CmdTeamChoosed(); });
-                    teamChoosedButton.interactable = false;
+                    if(!testMode)
+                        teamChoosedButton.interactable = false;
                     break;
             }
         }
@@ -201,6 +214,7 @@ public class PlayerController : NetworkBehaviour
         showMyCardsCanvas.gameObject.SetActive(false);
         mainCanvas.gameObject.SetActive(false);
         healthCanvas.gameObject.SetActive(false);
+        numberOfTurnsCanvas.gameObject.SetActive(false);
         isItMyTurnCanvas.gameObject.SetActive(false);
     }
 
@@ -223,12 +237,17 @@ public class PlayerController : NetworkBehaviour
                 updateTeamMembersText();
 
         }
-            
+
 
         if (!isLocalPlayer)
             return;
 
-        if(!teamChoosed)
+        //permet d'éviter d'avoir un nombre de tour égal à 0
+        if (numberOfBallsFired >= 1)
+            numberOfTurns = Mathf.CeilToInt(numberOfBallsFired / 2.0f) ;
+        numberOfTurnsText.text = "Tour : " + numberOfTurns + " / 24";
+
+        if (!teamChoosed)
             setTeamsMembersTexts();
 
         if (isItMyTurnHook)
@@ -331,6 +350,8 @@ public class PlayerController : NetworkBehaviour
         {
             GetComponent<ComputerHealth>().setHealth(cardPlayedByThePlayer.touchedLayer, cardPlayedByThePlayer.getDamage(), false);
         }
+
+        RpcIncreaseNumberOfTurns();
     }
 
     [Command]
@@ -348,6 +369,7 @@ public class PlayerController : NetworkBehaviour
         showMyCardsCanvas.gameObject.SetActive(false);
         mainCanvas.gameObject.SetActive(false);
         healthCanvas.gameObject.SetActive(false);
+        numberOfTurnsCanvas.gameObject.SetActive(false);
         isItMyTurnCanvas.gameObject.SetActive(false);
         teamChoosed = true;
 
@@ -424,13 +446,14 @@ public class PlayerController : NetworkBehaviour
         }
 
     }
-
+    #region Choix du personnage
     [Command]
     public void CmdChooseCharacter(string character)
     {
         RpcUpdateChooseCharacter(character);
 
     }
+       
 
     [ClientRpc]
     public void RpcUpdateChooseCharacter(string character)
@@ -451,27 +474,77 @@ public class PlayerController : NetworkBehaviour
         mainCanvas.gameObject.SetActive(true);
         chooseCharacterCanvas.gameObject.SetActive(false);
         healthCanvas.gameObject.SetActive(true);
+        numberOfTurnsCanvas.gameObject.SetActive(true);
         isItMyTurnCanvas.gameObject.SetActive(true);
     }
+    #endregion
 
-    public void hideMyCards()
+    #region Affichage des cartes
+    public void hideCards(string whoseCards = "me")
+    {
+        if (!isLocalPlayer)
+            return;
+        if(whoseCards == "me")
+        {
+            showMyCardsCanvas.gameObject.SetActive(false);
+            mainCanvas.gameObject.SetActive(true);
+        }
+        else
+        {
+            //TODO gérer la disparition de l'écran des cartes du coéquipier
+        }
+        
+    }
+
+    public void showCards(string whoseCards = "me")
     {
         if (!isLocalPlayer)
             return;
 
-        showMyCardsCanvas.gameObject.SetActive(false);
-        mainCanvas.gameObject.SetActive(true);
+        if(whoseCards == "me")
+        {
+            showMyCardsCanvas.gameObject.SetActive(true);
+            mainCanvas.gameObject.SetActive(false);
+        }
+        else
+        {
+            //TODO gérer l'affichage des cartes du coéquipier
+        }
+
     }
 
-    public void showMyCards()
+    public string getAllMyCardsTitleString()
     {
-        if (!isLocalPlayer)
-            return;
-
-        showMyCardsCanvas.gameObject.SetActive(true);
-        mainCanvas.gameObject.SetActive(false);
+        return allMyCardsTitleString;
     }
 
+    [Command]
+    public void CmdSetAllTeamMateCardsTitleString()
+    {
+        RpcSetAllTeamMateCardsTitleString();
+    }
+
+    [ClientRpc]
+    public void RpcSetAllTeamMateCardsTitleString()
+    {
+        Dictionary<NetworkInstanceId, NetworkIdentity> playersDico = NetworkServer.objects;
+        PlayerController p;
+        foreach (var pair in playersDico)
+        {
+            if (pair.Value.name == "Player(Clone)")
+            {
+                p = pair.Value.gameObject.GetComponent<PlayerController>();
+                //Si c'est notre coéquipier mais que ce n'est pas nous
+                if(p.getTeamNumber() == this.teamNumber && p != this)
+                {
+                    Debug.Log("Coéquipier trouvé : " + p.getPlayerName());
+                    return;
+                }
+            }
+        }
+    }
+
+    #endregion
 
     public string getPlayerName()
     {
@@ -483,6 +556,7 @@ public class PlayerController : NetworkBehaviour
         playerName = newPlayerName;
     }
 
+    #region Méthodes liées au teamNumber
     public int getTeamNumber()
     {
         return teamNumber;
@@ -584,17 +658,22 @@ public class PlayerController : NetworkBehaviour
             }
         }
 
-        if (numberOfPeopleInTeam1 >= minNumberOfPlayersPerTeam && numberOfPeopleInTeam1 == numberOfPeopleInTeam2)
-            teamChoosedButton.interactable = true;
-        else
-            teamChoosedButton.interactable = false;
+        if(!testMode)
+        {
+            if (numberOfPeopleInTeam1 >= minNumberOfPlayersPerTeam && numberOfPeopleInTeam1 == numberOfPeopleInTeam2)
+                teamChoosedButton.interactable = true;
+            else
+                teamChoosedButton.interactable = false;
+        }
+        
 
         team1MembersText.text = playersInTeam1;
         team2MembersText.text = playersInTeam2;
     }
 
+    #endregion
 
-
+    #region Méthodes liées au hatColor
     public string getHatColor()
     {
         return hatColor;
@@ -612,6 +691,8 @@ public class PlayerController : NetworkBehaviour
         this.hatColor = hatColor;
 
     }
+    #endregion
+
 
     public string getTeamsMembers()
     {
@@ -623,15 +704,18 @@ public class PlayerController : NetworkBehaviour
         this.teamsMembers = teamsMembers;
     }
 
+    #region Méthodes liées aux tours
+
     [Command]
-    public void CmdActivateIsMyTurnHookOfPeopleofMyTeam()
+    public void CmdIncreaseNumberOfTurns()
     {
-        RpcActivateIsMyTurnHookOfPeopleofMyTeam();
+        RpcIncreaseNumberOfTurns();
     }
 
     [ClientRpc]
-    public void RpcActivateIsMyTurnHookOfPeopleofMyTeam()
+    public void RpcIncreaseNumberOfTurns()
     {
+
         Dictionary<NetworkInstanceId, NetworkIdentity> playersDico = NetworkServer.objects;
         PlayerController p;
         foreach (var pair in playersDico)
@@ -639,10 +723,36 @@ public class PlayerController : NetworkBehaviour
             if (pair.Value.name == "Player(Clone)")
             {
                 p = pair.Value.gameObject.GetComponent<PlayerController>();
-                if (p.getTeamNumber() == teamNumber)
-                    p.setIsItMyTurnHook(true);
+                p.setNumberOTurns();
             }
         }
         
     }
+
+    public int getNumberOfTurns()
+    {
+        return numberOfTurns;
+    }
+
+    //Le nombre de tour n'augmente que de 1, donc pas besoin de passer d'arguments en paramètre
+    public void setNumberOTurns()
+    {
+        numberOfBallsFired++;
+    }
+    #endregion
+
+    #region Méthodes liées à l'ordre du joueur
+    public void setPlayerOrder(int newPlayerOrder)
+    {
+        this.playerOrder = newPlayerOrder;
+    }
+
+    public int getPlayerOrder()
+    {
+        return playerOrder;
+    }
+
+    #endregion
+
+    
 }

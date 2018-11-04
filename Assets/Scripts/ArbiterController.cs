@@ -32,7 +32,10 @@ public class ArbiterController : MonoBehaviour {
         Card virusCrypto = new Card("VIRUS\nCRYPTOLOCKER",
                                " Alors que vous allumez votre ordinateur pour consulter vos mails, un message apparait. Il faut payer une rançon pour récupérer vos données.",
                                "OS -2", true, ComputerLayer.OS, 2, new Color(255, 0, 0));
+        
 
+        Card trojanPlus = new Card("TROJAN+", "Une fois cette carte posée, le trojan fait des dégâts.",
+                               "SOFTWARE -3", true, ComputerLayer.SOFTWARE, 3, new Color(0, 176, 80));
 
 
         Card ddos = new Card("DDOS", "Une attaque DDoS vise à rendre un serveur indisponible en surchargeant la bande passante du serveur ou en accaparant ses ressources jusqu'à épuisement.",
@@ -43,9 +46,6 @@ public class ArbiterController : MonoBehaviour {
 
         Card vpn = new Card("VPN", "Le VPN est un tunnel sécurisé à l’intérieur d’un réseau.",
                                "SOFTWARE +2", false, ComputerLayer.SOFTWARE, 2, new Color(0, 176, 240));
-
-        Card trojanPlus = new Card("TROJAN+", "Une fois cette carte posée, le trojan fait des dégâts.",
-                               "SOFTWARE -3", true, ComputerLayer.SOFTWARE, 3, new Color(0, 176, 80));
 
 
 
