@@ -29,19 +29,11 @@ public class VirusController : MonoBehaviour {
         {
             playerWhoFiredTheVirus.setIsItMyTurnHook(false);
         }
-            
 
 
         if(playerController != null)
         {
             playerController.setIsItMyTurnHook(true);
-            /*teamNumberOfTheTouchedPlayer = playerController.getTeamNumber();
-
-            // On met à jour les dégats de tous les joueurs de la même équipe
-            if(teamNumberOfTheTouchedPlayer != 0)
-            {
-
-            }*/
         }
         
         if (computerHealth != null)

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 using System.Text.RegularExpressions;
+using UnityEngine.Networking.NetworkSystem;
 
 public class PlayerController : NetworkBehaviour
 {
@@ -17,6 +18,8 @@ public class PlayerController : NetworkBehaviour
     int numberOfPeopleInTeam1 = 0;
     int numberOfPeopleInTeam2 = 0;
     public bool testMode = true;
+    Dictionary<NetworkInstanceId, NetworkIdentity> playersInTeam1Dico;
+    Dictionary<NetworkInstanceId, NetworkIdentity> playersInTeam2Dico;
 
 
     #region variables getters;setters
@@ -25,6 +28,7 @@ public class PlayerController : NetworkBehaviour
     public int numberOfPlayersInTheGame { get; set; }
     public string team1Members { get; set; }
     public string team2members { get; set; }
+    
     #endregion
 
     #region SerializeField - permet d'attribuer des valeurs à ces atttributs via Unity directement
@@ -115,6 +119,8 @@ public class PlayerController : NetworkBehaviour
     public string teamsMembers = "";
     [SyncVar]
     bool teamChoosed = false;
+    [SyncVar]
+    bool characterChoosed = false;
     //Permet de savoir l'ordre du joueur et si l'ordre est égal à 1, alors c'est ce joueur qui incrémentera le nombre de tours
     [SyncVar]
     int playerOrder = 0;
@@ -129,6 +135,8 @@ public class PlayerController : NetworkBehaviour
     string allMyCardsTitleString = "";
     [SyncVar]
     string allTeamMateCardsString = "";
+    [SyncVar]
+    int id;
     #endregion
 
     IEnumerator WaitFewSecondsBeforeDistribuingCards()
@@ -167,6 +175,8 @@ public class PlayerController : NetworkBehaviour
 
     public void setIsItMyTurnHook(bool isItMyTurnHook)
     {
+        if (isLocalPlayer)
+            CmdSetIsItMyTurnHookForAllMyTeam(teamNumber, isItMyTurnHook);
         if (!isServer)
             return;
         this.isItMyTurnHook = isItMyTurnHook;
@@ -177,6 +187,33 @@ public class PlayerController : NetworkBehaviour
         return isItMyTurnHook;
     }
 
+    [Command]
+    public void CmdSetIsItMyTurnHookForAllMyTeam(int teamNumber, bool isItMyTurn)
+    {
+        RpcSetIsItMyTurnHookForAllMyTeam(teamNumber, isItMyTurn);
+    }
+
+    [ClientRpc]
+    public void RpcSetIsItMyTurnHookForAllMyTeam(int teamNumber, bool isItMyTurn)
+    {
+        if(teamNumber == 1)
+        {
+            foreach (var pair in playersInTeam1Dico)
+                pair.Value.gameObject.GetComponent<PlayerController>().setIsItMyTurnHook(isItMyTurn);
+
+            foreach (var pair in playersInTeam2Dico)
+                pair.Value.gameObject.GetComponent<PlayerController>().setIsItMyTurnHook(!isItMyTurn);
+        }
+        else if(teamNumber == 2)
+        {
+            foreach (var pair in playersInTeam2Dico)
+                pair.Value.gameObject.GetComponent<PlayerController>().setIsItMyTurnHook(isItMyTurn);
+
+            foreach (var pair in playersInTeam1Dico)
+                pair.Value.gameObject.GetComponent<PlayerController>().setIsItMyTurnHook(!isItMyTurn);
+        }
+    }
+
     void addPossibilityToChooseTeamButtons()
     {
         Button[] playerButtons = GetComponentsInChildren<Button>();
@@ -184,7 +221,7 @@ public class PlayerController : NetworkBehaviour
         foreach (Button btn in playerButtons)
         {
             string tag = btn.tag;
-
+            Debug.Log(tag);
             switch (tag)
             {
                 case "chooseTeam1Button":
@@ -203,6 +240,7 @@ public class PlayerController : NetworkBehaviour
                     if(!testMode)
                         teamChoosedButton.interactable = false;
                     break;
+
             }
         }
     }
@@ -241,6 +279,9 @@ public class PlayerController : NetworkBehaviour
 
         if (!isLocalPlayer)
             return;
+
+        CmdSetAllTeamMateCardsTitleString();
+
 
         //permet d'éviter d'avoir un nombre de tour égal à 0
         if (numberOfBallsFired >= 1)
@@ -393,6 +434,40 @@ public class PlayerController : NetworkBehaviour
                     break;
             }
         }
+
+        //Set the team dictionnary
+        playersInTeam1Dico = NetworkServer.objects;
+        playersInTeam2Dico = NetworkServer.objects;
+
+        //Mise à jour du dictionnaire des joueurs de l'équipe 1, pour qu'il n'y ait que des joueurs de l'équipe 1
+        foreach (var pair in playersInTeam1Dico)
+        {
+            if (pair.Value.name == "Player(Clone)")
+            {
+                int dictionnaryPlayerTeamNumber = pair.Value.gameObject.GetComponent<PlayerController>().getTeamNumber();
+
+                if(dictionnaryPlayerTeamNumber != 1)
+                    playersInTeam1Dico.Remove(pair.Key);
+            }
+            else
+                playersInTeam1Dico.Remove(pair.Key);
+        }
+
+        //Mise à jour du dictionnaire des joueurs de l'équipe 2, pour qu'il n'y ait que des joueurs de l'équipe 2
+        foreach (var pair in playersInTeam2Dico)
+        {
+            if (pair.Value.name == "Player(Clone)")
+            {
+                int dictionnaryPlayerTeamNumber = pair.Value.gameObject.GetComponent<PlayerController>().getTeamNumber();
+
+                if (dictionnaryPlayerTeamNumber != 2)
+                    playersInTeam2Dico.Remove(pair.Key);
+            }
+            else
+                playersInTeam2Dico.Remove(pair.Key);
+        }
+
+
     }
 
     public void setMyPosition()
@@ -469,7 +544,7 @@ public class PlayerController : NetworkBehaviour
             femaleCharacter.gameObject.SetActive(false);
         }
 
-
+        characterChoosed = true;
         showMyCardsCanvas.gameObject.SetActive(false);
         mainCanvas.gameObject.SetActive(true);
         chooseCharacterCanvas.gameObject.SetActive(false);
@@ -527,6 +602,7 @@ public class PlayerController : NetworkBehaviour
     [ClientRpc]
     public void RpcSetAllTeamMateCardsTitleString()
     {
+        Debug.Log("moi : " + getPlayerName() + "---- ID : " + id);
         Dictionary<NetworkInstanceId, NetworkIdentity> playersDico = NetworkServer.objects;
         PlayerController p;
         foreach (var pair in playersDico)
@@ -535,9 +611,10 @@ public class PlayerController : NetworkBehaviour
             {
                 p = pair.Value.gameObject.GetComponent<PlayerController>();
                 //Si c'est notre coéquipier mais que ce n'est pas nous
-                if(p.getTeamNumber() == this.teamNumber && p != this)
+                
+                if (teamNumber != 0 && p.getTeamNumber() == this.teamNumber && this.id != p.id)
                 {
-                    Debug.Log("Coéquipier trouvé : " + p.getPlayerName());
+                    Debug.Log("Coéquipier trouvé : " + p.getPlayerName() + "---- ID : " + p.id);
                     return;
                 }
             }
@@ -554,6 +631,16 @@ public class PlayerController : NetworkBehaviour
     public void setPlayerName(string newPlayerName)
     {
         playerName = newPlayerName;
+    }
+
+    public int getId()
+    {
+        return id;
+    }
+
+    public void setId(int id)
+    {
+        this.id = id;
     }
 
     #region Méthodes liées au teamNumber
@@ -753,6 +840,6 @@ public class PlayerController : NetworkBehaviour
     }
 
     #endregion
-
     
+
 }

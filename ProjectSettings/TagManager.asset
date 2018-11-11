@@ -25,6 +25,7 @@ TagManager:
   - chooseTeam1Button
   - chooseTeam2Button
   - teamChoosedButton
+  - sendMessageButton
   layers:
   - Default
   - TransparentFX

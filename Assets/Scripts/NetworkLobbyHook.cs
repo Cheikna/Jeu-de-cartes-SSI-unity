@@ -11,6 +11,7 @@ public class NetworkLobbyHook : LobbyHook {
         LobbyPlayer lobby = lobbyPlayer.GetComponent<LobbyPlayer>();
         PlayerController localPlayer = gamePlayer.GetComponent<PlayerController>();
         string playerNameInLobby = lobby.playerName.Replace('>', '-').Replace('&', '-');
+        localPlayer.setId(lobby.id);
         localPlayer.setPlayerName(playerNameInLobby);
         
     }

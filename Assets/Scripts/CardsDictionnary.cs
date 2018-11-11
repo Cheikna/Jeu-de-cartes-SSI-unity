@@ -44,5 +44,20 @@ public class CardsDictionnary {
         return cardsDictionary;
     }
 
-	
+    public static Dictionary<int, Card> getCardsDictionnaryForDistribution()
+    {
+        Dictionary<int, Card> cardsDictionary = new Dictionary<int, Card>();
+
+        int i = 1;
+
+        foreach (KeyValuePair<string, Card> card in getCardsDictionnary())
+        {
+            cardsDictionary.Add(i, card.Value);
+        }
+
+        return cardsDictionary;
+    }
+
+
+
 }

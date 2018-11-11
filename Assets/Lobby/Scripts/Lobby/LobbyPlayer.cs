@@ -15,6 +15,8 @@ namespace Prototype.NetworkLobby
         //used on server to avoid assigning the same color to two player
         static List<int> _colorInUse = new List<int>();
 
+        public int id { get; set; }
+
         public Button colorButton;
         public InputField nameInput;
         public Button readyButton;
