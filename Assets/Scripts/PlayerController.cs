@@ -138,7 +138,7 @@ public class PlayerController : NetworkBehaviour
     [SyncVar]
     int id;
     [SyncVar]
-    bool allPlayersHaveChosenTheirTeams = false;
+    bool allPlayersHaveChosenTheirCharacters = false;
     [SyncVar]
     bool playersCanStartToPlay = false;
     #endregion
@@ -189,7 +189,7 @@ public class PlayerController : NetworkBehaviour
             if (!teamChoosed)
                 updateTeamMembersText();
 
-            allPlayersHaveChosenTheirTeams = haveAllPlayerChosenTheirTeams();
+            allPlayersHaveChosenTheirCharacters = haveAllPlayerChosenTheirCharacters();
 
         }
 
@@ -208,7 +208,7 @@ public class PlayerController : NetworkBehaviour
         if (!teamChoosed)
             setTeamsMembersTexts();
 
-        if(allPlayersHaveChosenTheirTeams)
+        if(allPlayersHaveChosenTheirCharacters)
         {
             if (isItMyTurnHook)
             {
@@ -688,9 +688,9 @@ public class PlayerController : NetworkBehaviour
 
     }
 
-    public bool isTeamChoosed()
+    public bool isCharacterChoosed()
     {
-        return teamChoosed;
+        return characterChoosed;
     }
 
     public string getTeamsMembers()
@@ -719,6 +719,7 @@ public class PlayerController : NetworkBehaviour
             if (pair.Value.name == "Player(Clone)")
             {
                 player = pair.Value.gameObject.GetComponent<PlayerController>();
+                players.Add(player);
                 team = player.getTeamNumber();
                 if (team == 1)
                     playersInTeam1 += player.getPlayerName() + regexTeam + team + regexNewPlayer;
@@ -782,19 +783,19 @@ public class PlayerController : NetworkBehaviour
         team2MembersText.text = playersInTeam2;
     }
 
-    public bool haveAllPlayerChosenTheirTeams()
+    public bool haveAllPlayerChosenTheirCharacters()
     {
-        bool allPlayersInATeam = true;
+        bool allPlayersHaveATeam = true;
         Dictionary<NetworkInstanceId, NetworkIdentity> playersDico = NetworkServer.objects;
         foreach (var pair in playersDico)
         {
             if (pair.Value.name == "Player(Clone)")
             {
-                allPlayersInATeam = (allPlayersInATeam & pair.Value.gameObject.GetComponent<PlayerController>().isTeamChoosed());
+                allPlayersHaveATeam = (allPlayersHaveATeam & pair.Value.gameObject.GetComponent<PlayerController>().isCharacterChoosed());
             }
         }
 
-        return allPlayersInATeam;
+        return allPlayersHaveATeam;
     }
 
     public void allPlayersCanStartToPlay()
