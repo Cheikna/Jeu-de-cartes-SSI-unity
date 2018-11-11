@@ -26,6 +26,7 @@ TagManager:
   - chooseTeam2Button
   - teamChoosedButton
   - sendMessageButton
+  - virus
   layers:
   - Default
   - TransparentFX

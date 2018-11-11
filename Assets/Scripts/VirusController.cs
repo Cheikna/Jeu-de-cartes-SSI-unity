@@ -14,7 +14,9 @@ public class VirusController : MonoBehaviour {
     public ComputerLayer targetLayer2 { get; set; }
     public int damageLayer2 { get; set; }
     public PlayerController playerWhoFiredTheVirus { get; set; }
+    public int numberOfTeamWhoFiredTheVirus { get; set; }
     int teamNumberOfTheTouchedPlayer = 0;
+
 
 
     

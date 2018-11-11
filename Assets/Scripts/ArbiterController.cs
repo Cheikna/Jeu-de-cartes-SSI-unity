@@ -78,6 +78,8 @@ public class ArbiterController : MonoBehaviour {
         }
         
         int nbPlayers = numberOfPlayersInTheGame; //TODO players.count
+        if (nbPlayers == 0)
+            nbPlayers = 1;
         int nbCardsForEachPlayer = arbiterCardsDeck.Count / nbPlayers;
 
         // On doit passer par le calcul précedent au cas où il y aurait des cartes en trop ce qui provoquerait un nombre de cartes différents pour les joueurs

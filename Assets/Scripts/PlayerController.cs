@@ -137,6 +137,10 @@ public class PlayerController : NetworkBehaviour
     string allTeamMateCardsString = "";
     [SyncVar]
     int id;
+    [SyncVar]
+    bool allPlayersHaveChosenTheirTeams = false;
+    [SyncVar]
+    bool playersCanStartToPlay = false;
     #endregion
 
     IEnumerator WaitFewSecondsBeforeDistribuingCards()
@@ -152,6 +156,8 @@ public class PlayerController : NetworkBehaviour
     // Use this for initialization
     void Start()
     {
+        // On doit attendre que tous les joueurs soient prêts avant de pouvoir lancer une carte
+        confirmCardButton.interactable = false;
         areAllCardsDistributed = false;
         numberOfPlayersInTheGame = Prototype.NetworkLobby.LobbyPlayerList.numberOfPlayerInTheRoom;
         playersInGame = new List<GameObject>(GameObject.FindGameObjectsWithTag("player"));
@@ -173,10 +179,60 @@ public class PlayerController : NetworkBehaviour
         
     }
 
+    // Update is called once per frame
+    void Update()
+    {
+        if (isServer)
+        {
+            RpcGetNumberOfSpawnedVirus();
+
+            if (!teamChoosed)
+                updateTeamMembersText();
+
+            allPlayersHaveChosenTheirTeams = haveAllPlayerChosenTheirTeams();
+
+        }
+
+
+        if (!isLocalPlayer)
+            return;
+
+        //CmdSetAllTeamMateCardsTitleString();
+
+
+        //permet d'éviter d'avoir un nombre de tour égal à 0
+        if (numberOfBallsFired >= 1)
+            numberOfTurns = Mathf.CeilToInt(numberOfBallsFired / 2.0f);
+        numberOfTurnsText.text = "Tour : " + numberOfTurns + " / " + maxNumberOfTurns;
+
+        if (!teamChoosed)
+            setTeamsMembersTexts();
+
+        if(allPlayersHaveChosenTheirTeams)
+        {
+            if (isItMyTurnHook)
+            {
+                isItMyTurnText.text = "A votre tour de jouer";
+                confirmCardButton.interactable = true;
+            }
+            else
+            {
+                isItMyTurnText.text = "Au tour de l'adversaire !";
+                confirmCardButton.interactable = false;
+            }
+        }
+        else
+        {
+            isItMyTurnText.text = "En attente des autres joueurs...";
+        }
+        
+
+    }
+
     public void setIsItMyTurnHook(bool isItMyTurnHook)
     {
-        if (isLocalPlayer)
-            CmdSetIsItMyTurnHookForAllMyTeam(teamNumber, isItMyTurnHook);
+        /*if (isLocalPlayer)
+            CmdSetIsItMyTurnHookForAllMyTeam(teamNumber, isItMyTurnHook);*/
         if (!isServer)
             return;
         this.isItMyTurnHook = isItMyTurnHook;
@@ -196,6 +252,10 @@ public class PlayerController : NetworkBehaviour
     [ClientRpc]
     public void RpcSetIsItMyTurnHookForAllMyTeam(int teamNumber, bool isItMyTurn)
     {
+        /**
+         * Les joueurs de l'équipe en paramètre peuvent jouer ou ne plus jouer en fonction du paramètre isItMyTurn 
+         * Et les joueurs de l'équipe adverse ont donc le choix inverse
+         */
         if(teamNumber == 1)
         {
             foreach (var pair in playersInTeam1Dico)
@@ -221,7 +281,6 @@ public class PlayerController : NetworkBehaviour
         foreach (Button btn in playerButtons)
         {
             string tag = btn.tag;
-            Debug.Log(tag);
             switch (tag)
             {
                 case "chooseTeam1Button":
@@ -266,43 +325,7 @@ public class PlayerController : NetworkBehaviour
             
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        if (isServer)
-        {
-            if(!teamChoosed)
-                updateTeamMembersText();
-
-        }
-
-
-        if (!isLocalPlayer)
-            return;
-
-        CmdSetAllTeamMateCardsTitleString();
-
-
-        //permet d'éviter d'avoir un nombre de tour égal à 0
-        if (numberOfBallsFired >= 1)
-            numberOfTurns = Mathf.CeilToInt(numberOfBallsFired / 2.0f) ;
-        numberOfTurnsText.text = "Tour : " + numberOfTurns + " / 24";
-
-        if (!teamChoosed)
-            setTeamsMembersTexts();
-
-        if (isItMyTurnHook)
-        {
-            isItMyTurnText.text = "A votre tour de jouer";
-            confirmCardButton.interactable = true;
-        }
-        else
-        {
-            isItMyTurnText.text = "Au tour de l'adversaire !";
-            confirmCardButton.interactable = false;
-        }
-
-    }
+    
 
     void getAllOfThePlayersInAList()
     {        
@@ -347,7 +370,6 @@ public class PlayerController : NetworkBehaviour
 
         bool isAttakCard = (cardPlayedInfos[3].ToUpper() == "TRUE") ? true : false;
         ComputerLayer touchedLayer = ComputerLayer.HARDWARE;
-        Debug.Log("int touched lay String : " + cardPlayedInfos[4]);
         string touchedLayerString = cardPlayedInfos[4].ToUpper();
         if (touchedLayerString == "SOFTWARE")
             touchedLayer = ComputerLayer.SOFTWARE;
@@ -372,6 +394,7 @@ public class PlayerController : NetworkBehaviour
             virusEffects.targetLayer1 = cardPlayedByThePlayer.touchedLayer;
             virusEffects.damageLayer1 = cardPlayedByThePlayer.getDamage();
             virusEffects.playerWhoFiredTheVirus = this;
+            virusEffects.numberOfTeamWhoFiredTheVirus = this.teamNumber;
 
             //Changer la couleur de la balle pour qu'elle soit de la même couleur que la carte
             Renderer[] rends = virus.GetComponentsInChildren<Renderer>();
@@ -435,39 +458,58 @@ public class PlayerController : NetworkBehaviour
             }
         }
 
+    }
+
+    [Command]
+    public void CmdSetPlayersDicos()
+    {
+        RpcSetPlayersDicos();
+    }
+
+    [ClientRpc]
+    private void RpcSetPlayersDicos()
+    {
         //Set the team dictionnary
         playersInTeam1Dico = NetworkServer.objects;
         playersInTeam2Dico = NetworkServer.objects;
+        List<NetworkInstanceId> instanceToDeleteInDicoTeam1 = new List<NetworkInstanceId>();
+        List<NetworkInstanceId> instanceToDeleteInDicoTeam2 = new List<NetworkInstanceId>();
 
         //Mise à jour du dictionnaire des joueurs de l'équipe 1, pour qu'il n'y ait que des joueurs de l'équipe 1
         foreach (var pair in playersInTeam1Dico)
         {
+            Debug.Log(pair.Value);
             if (pair.Value.name == "Player(Clone)")
             {
                 int dictionnaryPlayerTeamNumber = pair.Value.gameObject.GetComponent<PlayerController>().getTeamNumber();
 
-                if(dictionnaryPlayerTeamNumber != 1)
-                    playersInTeam1Dico.Remove(pair.Key);
+                if (dictionnaryPlayerTeamNumber != 1)
+                    instanceToDeleteInDicoTeam1.Add(pair.Key);
             }
             else
-                playersInTeam1Dico.Remove(pair.Key);
+                instanceToDeleteInDicoTeam1.Add(pair.Key);
         }
 
         //Mise à jour du dictionnaire des joueurs de l'équipe 2, pour qu'il n'y ait que des joueurs de l'équipe 2
         foreach (var pair in playersInTeam2Dico)
         {
+
             if (pair.Value.name == "Player(Clone)")
             {
                 int dictionnaryPlayerTeamNumber = pair.Value.gameObject.GetComponent<PlayerController>().getTeamNumber();
 
                 if (dictionnaryPlayerTeamNumber != 2)
-                    playersInTeam2Dico.Remove(pair.Key);
+                    instanceToDeleteInDicoTeam2.Add(pair.Key);
             }
             else
-                playersInTeam2Dico.Remove(pair.Key);
+                instanceToDeleteInDicoTeam2.Add(pair.Key);
         }
 
-
+        //Suppression des différents éléments incompatibles dans les dictionnaires
+        foreach (NetworkInstanceId netId in instanceToDeleteInDicoTeam1)
+            playersInTeam1Dico.Remove(netId);
+        foreach (NetworkInstanceId netId in instanceToDeleteInDicoTeam2)
+            playersInTeam2Dico.Remove(netId);
     }
 
     public void setMyPosition()
@@ -592,34 +634,7 @@ public class PlayerController : NetworkBehaviour
     {
         return allMyCardsTitleString;
     }
-
-    [Command]
-    public void CmdSetAllTeamMateCardsTitleString()
-    {
-        RpcSetAllTeamMateCardsTitleString();
-    }
-
-    [ClientRpc]
-    public void RpcSetAllTeamMateCardsTitleString()
-    {
-        Debug.Log("moi : " + getPlayerName() + "---- ID : " + id);
-        Dictionary<NetworkInstanceId, NetworkIdentity> playersDico = NetworkServer.objects;
-        PlayerController p;
-        foreach (var pair in playersDico)
-        {
-            if (pair.Value.name == "Player(Clone)")
-            {
-                p = pair.Value.gameObject.GetComponent<PlayerController>();
-                //Si c'est notre coéquipier mais que ce n'est pas nous
-                
-                if (teamNumber != 0 && p.getTeamNumber() == this.teamNumber && this.id != p.id)
-                {
-                    Debug.Log("Coéquipier trouvé : " + p.getPlayerName() + "---- ID : " + p.id);
-                    return;
-                }
-            }
-        }
-    }
+    
 
     #endregion
 
@@ -673,41 +688,50 @@ public class PlayerController : NetworkBehaviour
 
     }
 
+    public bool isTeamChoosed()
+    {
+        return teamChoosed;
+    }
+
+    public string getTeamsMembers()
+    {
+        return teamsMembers;
+    }
+
+    public void setTeamsMembers(string teamsMembers)
+    {
+        this.teamsMembers = teamsMembers;
+    }
+
     public void updateTeamMembersText()
     {
-        
-        List<PlayerController> players = new List<PlayerController>();
-        Dictionary<NetworkInstanceId, NetworkIdentity> playersDico = NetworkServer.objects;
-        PlayerController p;
-        foreach (var pair in playersDico)
-        {
-            if (pair.Value.name == "Player(Clone)")
-            {
-                p = pair.Value.gameObject.GetComponent<PlayerController>();
-                players.Add(p);
-            }
-        }
-        
         string playersRepartitionInTeams = "";
         // Ces 2 variables permettront d'avoir en sortie d'abord les joueurs de lé'équipe 1 puis ceux de l'équipe 2
         string playersInTeam1 = "";
         string playersInTeam2 = "";
         int team = 0;
 
-        foreach (PlayerController player in players)
+        List<PlayerController> players = new List<PlayerController>();
+        Dictionary<NetworkInstanceId, NetworkIdentity> playersDico = NetworkServer.objects;
+        PlayerController player;
+        foreach (var pair in playersDico)
         {
-            team = player.getTeamNumber();
-            if(team == 1)
-                playersInTeam1 += player.getPlayerName() + regexTeam + team + regexNewPlayer;
-            else if(team == 2)
-                playersInTeam2 += player.getPlayerName() + regexTeam + team + regexNewPlayer;
+            if (pair.Value.name == "Player(Clone)")
+            {
+                player = pair.Value.gameObject.GetComponent<PlayerController>();
+                team = player.getTeamNumber();
+                if (team == 1)
+                    playersInTeam1 += player.getPlayerName() + regexTeam + team + regexNewPlayer;
+                else if (team == 2)
+                    playersInTeam2 += player.getPlayerName() + regexTeam + team + regexNewPlayer;
+            }
         }
 
         playersRepartitionInTeams += playersInTeam1 + playersInTeam2;
 
-        foreach (PlayerController player in players)
+        foreach (PlayerController p in players)
         {
-            player.setTeamsMembers(playersRepartitionInTeams);
+            p.setTeamsMembers(playersRepartitionInTeams);
         }
     }
 
@@ -758,6 +782,26 @@ public class PlayerController : NetworkBehaviour
         team2MembersText.text = playersInTeam2;
     }
 
+    public bool haveAllPlayerChosenTheirTeams()
+    {
+        bool allPlayersInATeam = true;
+        Dictionary<NetworkInstanceId, NetworkIdentity> playersDico = NetworkServer.objects;
+        foreach (var pair in playersDico)
+        {
+            if (pair.Value.name == "Player(Clone)")
+            {
+                allPlayersInATeam = (allPlayersInATeam & pair.Value.gameObject.GetComponent<PlayerController>().isTeamChoosed());
+            }
+        }
+
+        return allPlayersInATeam;
+    }
+
+    public void allPlayersCanStartToPlay()
+    {
+        // TODO
+    }
+
     #endregion
 
     #region Méthodes liées au hatColor
@@ -781,15 +825,7 @@ public class PlayerController : NetworkBehaviour
     #endregion
 
 
-    public string getTeamsMembers()
-    {
-        return teamsMembers;
-    }
-
-    public void setTeamsMembers(string teamsMembers)
-    {
-        this.teamsMembers = teamsMembers;
-    }
+    
 
     #region Méthodes liées aux tours
 
@@ -828,18 +864,20 @@ public class PlayerController : NetworkBehaviour
     }
     #endregion
 
-    #region Méthodes liées à l'ordre du joueur
-    public void setPlayerOrder(int newPlayerOrder)
-    {
-        this.playerOrder = newPlayerOrder;
-    }
-
-    public int getPlayerOrder()
-    {
-        return playerOrder;
-    }
-
-    #endregion
     
+    [ClientRpc]
+    public void RpcGetNumberOfSpawnedVirus()
+    {
+        Dictionary<NetworkInstanceId, NetworkIdentity> virusDico = NetworkServer.objects;
+        int numberOfSpawnedVirus = 0;
 
+        foreach (var pair in virusDico)
+        {
+            if (pair.Value.name == "Virus(Clone)")
+            {
+                numberOfSpawnedVirus++;
+            }
+        }
+        Debug.Log("Nombre de virus spawn : " + numberOfSpawnedVirus);
+    }
 }
