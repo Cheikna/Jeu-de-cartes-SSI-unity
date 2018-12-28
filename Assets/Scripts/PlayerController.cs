@@ -188,8 +188,8 @@ public class PlayerController : NetworkBehaviour
 
             if (!teamChoosed)
                 updateTeamMembersText();
-
-            allPlayersHaveChosenTheirCharacters = haveAllPlayerChosenTheirCharacters();
+            if(!allPlayersHaveChosenTheirCharacters)
+                allPlayersHaveChosenTheirCharacters = haveAllPlayerChosenTheirCharacters();
 
         }
 

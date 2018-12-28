@@ -6,17 +6,18 @@ using UnityEngine.Networking;
 
 public class ComputerHealth : NetworkBehaviour {
 
-    const int osMaxHealth = 6;
+    /*const int osMaxHealth = 6;
     const int softwareMaxHealth = 6;
-    const int hardwareMaxHealth = 6;
-    float oneLife;
+    const int hardwareMaxHealth = 6;*/
 
     [SyncVar(hook = "onChangeOsHealth")]
-    public int currentOsHealth = osMaxHealth;
+    public int currentOsHealth = (int)Constants.OS_MAX_HEALTH;
     [SyncVar(hook = "onChangeSoftwareHealth")]
-    public int currentSofwareHealth = softwareMaxHealth;
+    public int currentSoftwareHealth = (int)Constants.SOFTWARE_MAX_HEALTH;
     [SyncVar(hook = "onChangeHardwareHealth")]
-    public int currentHardwareHealth = hardwareMaxHealth;
+    public int currentHardwareHealth = (int)Constants.HARWARE_MAX_HEALTH;
+
+    public float size = 0;
 
     [SerializeField]
     private RectTransform osHealthBar;
@@ -24,13 +25,22 @@ public class ComputerHealth : NetworkBehaviour {
     private RectTransform softwareHealthBar;
     [SerializeField]
     private RectTransform hardwareHealthBar;
+    [SerializeField]
+    private RectTransform osHealthBar2;
+    [SerializeField]
+    private RectTransform softwareHealthBar2;
+    [SerializeField]
+    private RectTransform hardwareHealthBar2;
+
+
+    //Unité d'une vie par rapport à la taille de la barre de vie totale
+    float oneLife = (int)Constants.HEALTH_BAR_SIZE / (int)Constants.OS_MAX_HEALTH;
+    float oneLife2 = (int)Constants.HEALTH_BAR_SIZE / (int)Constants.OS_MAX_HEALTH;
 
     void Start()
     {
         if (!isLocalPlayer)
             return;
-
-        oneLife = softwareHealthBar.sizeDelta.x / softwareMaxHealth;
     }
     
     
@@ -46,32 +56,34 @@ public class ComputerHealth : NetworkBehaviour {
                 if(isCardDecreaseHealth)
                     currentOsHealth -= amount;
                 else
-                    currentOsHealth = updateIfItIsOverTheMaximumHealth(currentOsHealth + amount);
+                    currentOsHealth = updateIfItIsLessThanTheMaximumHealth(currentOsHealth + amount);
                 break;
 
             case ComputerLayer.SOFTWARE:
                 if (isCardDecreaseHealth)
-                    currentSofwareHealth -= amount;
+                    currentSoftwareHealth -= amount;
                 else
-                    currentSofwareHealth = updateIfItIsOverTheMaximumHealth(currentSofwareHealth + amount);
+                    currentSoftwareHealth = updateIfItIsLessThanTheMaximumHealth(currentSoftwareHealth + amount);
                 break;
 
             case ComputerLayer.HARDWARE:
                 if (isCardDecreaseHealth)
                     currentHardwareHealth -= amount;
                 else
-                    currentHardwareHealth = updateIfItIsOverTheMaximumHealth(currentHardwareHealth + amount);
+                    currentHardwareHealth = updateIfItIsLessThanTheMaximumHealth(currentHardwareHealth + amount);
                 break;
-        }        
-
+        }
+        Debug.Log("Current OS health : " + currentOsHealth);
+        Debug.Log("Current hard health : " + currentHardwareHealth);
+        Debug.Log("Current soft health : " + currentSoftwareHealth);
         if (currentOsHealth <= 0)
             currentOsHealth = 0;
-        if (currentSofwareHealth <= 0)
-            currentSofwareHealth = 0;
+        if (currentSoftwareHealth <= 0)
+            currentSoftwareHealth = 0;
         if (currentHardwareHealth <= 0)
             currentHardwareHealth = 0;
 
-        int remainingLife = currentOsHealth + currentSofwareHealth + currentHardwareHealth;
+        int remainingLife = currentOsHealth + currentSoftwareHealth + currentHardwareHealth;
 
         if (remainingLife <= 0)
         {
@@ -80,35 +92,40 @@ public class ComputerHealth : NetworkBehaviour {
             
     }
 
-    public int updateIfItIsOverTheMaximumHealth(int health)
+    public int updateIfItIsLessThanTheMaximumHealth(int health)
     {
         return (health > 6) ? 6 : health;
     }
 
 
-    //Même si cette méthode ressemble à une méthode précédente,
-    //elle reste nécessaire pour gérer les variations de points de vie à travers le serveurs et les clients
     public void resizeHealthBar(ComputerLayer touchedLayer, int health)
     {
-        float sizeGreenLife = 0;
+        float sizeGreenLife = oneLife * health;
+        float sizeGreenLife2 = oneLife2 * health;
         switch (touchedLayer)
         {
             case ComputerLayer.OS:
-                sizeGreenLife = oneLife * health;
+                //sizeGreenLife = oneLife * health;
                 osHealthBar.sizeDelta = new Vector2(sizeGreenLife, osHealthBar.sizeDelta.y);
+                osHealthBar2.sizeDelta = new Vector2(sizeGreenLife2, osHealthBar2.sizeDelta.y);
                 break;
 
             case ComputerLayer.SOFTWARE:
-                sizeGreenLife = oneLife * health;
+                //sizeGreenLife = oneLife * health;
                 softwareHealthBar.sizeDelta = new Vector2(sizeGreenLife, softwareHealthBar.sizeDelta.y);
+                softwareHealthBar2.sizeDelta = new Vector2(sizeGreenLife2, softwareHealthBar2.sizeDelta.y);
                 break;
 
             case ComputerLayer.HARDWARE:
-                sizeGreenLife = oneLife * health;
+                //sizeGreenLife = oneLife * health;
                 hardwareHealthBar.sizeDelta = new Vector2(sizeGreenLife, hardwareHealthBar.sizeDelta.y);
+                hardwareHealthBar2.sizeDelta = new Vector2(sizeGreenLife2, hardwareHealthBar2.sizeDelta.y);
                 break;
-        }      
-        
+        }
+        size = sizeGreenLife2;
+
+
+
     }
 
     // Obligation de passer par ces méthodes supplémentaires car Syncvar ne prend en 
