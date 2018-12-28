@@ -46,6 +46,16 @@ namespace Prototype.NetworkLobby
             if (_players.Contains(player))
                 return;
 
+            //récupération de l'id du dernier joueur puis le nouveau joueur aura cet id incrémenté de 1
+            if(_players.Count > 0)
+            {
+                player.id = _players[_players.Count - 1].id + 1;
+            }
+            else
+            {
+                player.id = 1;
+            }
+
             _players.Add(player);
 
             player.transform.SetParent(playerListContentTransform, false);

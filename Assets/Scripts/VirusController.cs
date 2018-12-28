@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class VirusController : MonoBehaviour {
 
-    
+
     public ComputerLayer targetLayer1 { get; set; }
     // Dégats occasionnés
     public int damageLayer1 { get; set; }
@@ -14,23 +14,30 @@ public class VirusController : MonoBehaviour {
     public ComputerLayer targetLayer2 { get; set; }
     public int damageLayer2 { get; set; }
     public PlayerController playerWhoFiredTheVirus { get; set; }
+    public int numberOfTeamWhoFiredTheVirus { get; set; }
+    int teamNumberOfTheTouchedPlayer = 0;
 
-    void OnCollisionEnter(Collision collision)
-    {        
+
+
+
+    void OnTriggerEnter(Collider collision)
+    {
         var computerHit = collision.gameObject;
         var computerHealth = computerHit.GetComponent<ComputerHealth>();
         var playerController = computerHit.GetComponent<PlayerController>();
 
         // Récupération du joueur qui a instancié le virus, celui qui en est à l'origine afin de dire qu'il vient de jouer
         if (playerWhoFiredTheVirus != null)
+        {
             playerWhoFiredTheVirus.setIsItMyTurnHook(false);
+        }
 
 
         if(playerController != null)
         {
             playerController.setIsItMyTurnHook(true);
         }
-        
+
         if (computerHealth != null)
         {
             // Vérifier si ce sont des cartes d'attaques et non des cartes rajoutant des point de vie au joueur
@@ -41,7 +48,7 @@ public class VirusController : MonoBehaviour {
 
         }
 
-        
+
         Destroy(gameObject);
     }
 }

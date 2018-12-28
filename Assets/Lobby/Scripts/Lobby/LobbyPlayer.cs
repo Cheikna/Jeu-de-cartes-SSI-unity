@@ -15,6 +15,8 @@ namespace Prototype.NetworkLobby
         //used on server to avoid assigning the same color to two player
         static List<int> _colorInUse = new List<int>();
 
+        public int id { get; set; }
+
         public Button colorButton;
         public InputField nameInput;
         public Button readyButton;
@@ -234,7 +236,7 @@ namespace Prototype.NetworkLobby
         [ClientRpc]
         public void RpcUpdateCountdown(int countdown)
         {
-            LobbyManager.s_Singleton.countdownPanel.UIText.text = "Debut du match dans " + countdown;
+            LobbyManager.s_Singleton.countdownPanel.UIText.text = "DEBUT DU MATCH DANS " + countdown;
             LobbyManager.s_Singleton.countdownPanel.gameObject.SetActive(countdown != 0);
         }
 
