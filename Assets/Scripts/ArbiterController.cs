@@ -80,7 +80,8 @@ public class ArbiterController : MonoBehaviour {
         int nbPlayers = numberOfPlayersInTheGame; //TODO players.count
         if (nbPlayers == 0)
             nbPlayers = 1;
-        int nbCardsForEachPlayer = arbiterCardsDeck.Count / nbPlayers;
+        //int nbCardsForEachPlayer = arbiterCardsDeck.Count / nbPlayers;
+        int nbCardsForEachPlayer = arbiterCardsDeck.Count / 1;
 
         // On doit passer par le calcul précedent au cas où il y aurait des cartes en trop ce qui provoquerait un nombre de cartes différents pour les joueurs
         int nbCardsToDistrib = nbCardsForEachPlayer * nbPlayers;
@@ -88,7 +89,9 @@ public class ArbiterController : MonoBehaviour {
 
         for(int i = 0; i < nbCardsToDistrib; i++)
         {
-            if (indexPlayer >= nbPlayers)
+            //TODO à corriger
+            if (indexPlayer >= 2)
+                //if (indexPlayer >= nbPlayers)
                 indexPlayer = 0;
             //Si on est à la dernière carte à distribuer pour chaque joueurs
             if (i == (nbCardsToDistrib - 1))

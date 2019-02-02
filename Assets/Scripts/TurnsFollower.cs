@@ -35,7 +35,8 @@ public class TurnsFollower : NetworkBehaviour {
                 players.Add(p);
             }
         }
-        players[0].setIsItMyTurnHook(true);
+        //players[0].setIsItMyTurnHook(true);
+        players[0].CmdSetFirstTeamWhichPlays();
     }
 
     

@@ -70,6 +70,7 @@ public class CardsDeck : MonoBehaviour {
     public void getDeckOfCardsFromThePlayerController(List<Card> cards)
     {
         //cardsDeck = playerController.getMyCardsDeck();
+        getRandomCards();
         //cardsDeck = cards;
         indexOfCard = 0;
         numberOfCards = cardsDeck.Count;
@@ -141,11 +142,19 @@ public class CardsDeck : MonoBehaviour {
         Card ddos = new Card("DDOS", "Une attaque DDoS vise à rendre un serveur indisponible en surchargeant la bande passante du serveur ou en accaparant ses ressources jusqu'à épuisement.",
                                "HARDWARE -4", true, ComputerLayer.HARDWARE, 4, new Color(255, 0, 0));
 
+        Card scan = new Card("SCAN", "Le scanner analyse les éléments de votre ordinateur.",
+                               "SOFTWARE +1", false, ComputerLayer.SOFTWARE, 1, new Color(0, 176, 240));
+
+        Card vpn = new Card("VPN", "Le VPN est un tunnel sécurisé à l’intérieur d’un réseau.",
+                               "SOFTWARE +2", false, ComputerLayer.SOFTWARE, 2, new Color(0, 176, 240));
+
         add(trojan);
         add(virusCrypto);
         add(ddos);
-        indexOfCard = 0;
-        numberOfCards = cardsDeck.Count;
-        showCardInformations();
+        add(scan);
+        add(vpn);
+        //indexOfCard = 0;
+        //numberOfCards = cardsDeck.Count;
+        //showCardInformations();
     }
 }

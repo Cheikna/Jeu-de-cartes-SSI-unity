@@ -14,4 +14,12 @@ public enum Constants {
 
     HEALTH_BAR_SIZE = 200,
 
+    NUMBER_MAX_OF_CARDS_PLAYED_BY_EACH_TEAM = 2,
+
+    NUMBER_BASE_OF_CARDS_PLAYED_BY_EACH_TEAM = 1,
+
+    ADD,
+
+    RESET,
+
 }
