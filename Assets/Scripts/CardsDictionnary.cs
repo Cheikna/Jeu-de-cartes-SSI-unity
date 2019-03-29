@@ -34,47 +34,37 @@ public class CardsDictionnary {
 
         //Ajout des cartes à au dictionnaire
         cardsDictionary.Add("trojan", trojan);
-        dictionaryKeys.Add("trojan");
         cardsDictionary.Add("virusCrypto", virusCrypto);
-        dictionaryKeys.Add("virusCrypto");
         cardsDictionary.Add("trojanPlus", trojanPlus);
-        dictionaryKeys.Add("trojanPlus");
         cardsDictionary.Add("ddos", ddos);
-        dictionaryKeys.Add("ddos");
         cardsDictionary.Add("scan", scan);
-        dictionaryKeys.Add("scan");
         cardsDictionary.Add("vpn", vpn);
-        dictionaryKeys.Add("vpn");
 
-
-
+        loadDictionaryKeys();
 
         return cardsDictionary;
     }
 
-    /*public static Dictionary<int, Card> getCardsDictionnaryForDistribution()
+    public static void loadDictionaryKeys()
     {
-        Dictionary<int, Card> cardsDictionary = new Dictionary<int, Card>();
-
-        int i = 1;
-
-        foreach (KeyValuePair<string, Card> card in getCardsDictionnary())
+        foreach (KeyValuePair<string, Card> card in cardsDictionary)
         {
-            cardsDictionary.Add(i, card.Value);
+            dictionaryKeys.Add(card.Key);
         }
-
-        return cardsDictionary;
-    }*/
+    }
 
     public static Card getRandomCard()
     {
+        if (dictionaryKeys.Count <= 1)
+            loadDictionaryKeys();
+
         Card card = null;
         int rdn = 0;
 
         if(dictionaryKeys.Count > 0)
             rdn = Random.Range(0, dictionaryKeys.Count);
-
         string key = dictionaryKeys[rdn];
+        dictionaryKeys.Remove(key);
         card = cardsDictionary[key];
         return card;
     }

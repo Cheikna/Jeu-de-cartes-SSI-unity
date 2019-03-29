@@ -10,18 +10,16 @@ public class PlayerController : NetworkBehaviour
 {
 
     List<GameObject> playersInGame = new List<GameObject>();
-    ArbiterController arbiter;
     bool areAllPlayersHere = false;
     int indexPlayerWhoPlays = 0;
     List<Card> myCardsDeck = new List<Card>();    
     const int minNumberOfPlayersPerTeam = 1;
     int numberOfPeopleInTeam1 = 0;
     int numberOfPeopleInTeam2 = 0;
+    int numberOfPlayersInLobby = 0;
     public bool testMode = true;
     Dictionary<NetworkInstanceId, NetworkIdentity> playersInTeam1Dico;
     Dictionary<NetworkInstanceId, NetworkIdentity> playersInTeam2Dico;
-    CardsDeck cardsDeck;
-
 
     #region variables getters;setters
     public bool isGameOver { get; set; }
@@ -35,8 +33,6 @@ public class PlayerController : NetworkBehaviour
     #region SerializeField - permet d'attribuer des valeurs à ces atttributs via Unity directement
     [SerializeField]
     private GameObject arbiterControllerGameObject;
-    [SerializeField]
-    TemporaryCardsDeck tempCardsDeck;
     [SerializeField]
     private TurnsFollower turnsFollower;
     [SerializeField]
@@ -146,6 +142,8 @@ public class PlayerController : NetworkBehaviour
     bool playersCanStartToPlay = false;
     [SyncVar]
     int firstTeamWhichPlays = 1;
+    [SyncVar]
+    private bool isGameWon = false;
     #endregion
 
     IEnumerator WaitFewSecondsBeforeDistribuingCards()
@@ -181,6 +179,9 @@ public class PlayerController : NetworkBehaviour
 
             addPossibilityToChooseTeamButtons();
             deactivateAllUselessCanvasForTheBeginning();
+
+            //Initialisation du deck de cartes du joueurs local
+            cardsDeckScriptFromThePlayer.loadCards();
         }
         
     }
@@ -320,54 +321,18 @@ public class PlayerController : NetworkBehaviour
         numberOfTurnsCanvas.gameObject.SetActive(false);
         isItMyTurnCanvas.gameObject.SetActive(false);
     }
-
-    public void addCardToMyDeck(Card card)
-    {
-        if(isLocalPlayer)
-        {
-            Card trojan = new Card("Trojan",
-                                      "Le cheval de Troie est un logiciel en apparence légitime, mais qui contient une fonctionnalité malveillante.C’est un virus statique.",
-                                      "SOFTWARE -2", true, ComputerLayer.SOFTWARE, 2, new Color(255, 0, 0));
-
-
-
-            Card virusCrypto = new Card("VIRUS\nCRYPTOLOCKER",
-                                   " Alors que vous allumez votre ordinateur pour consulter vos mails, un message apparait. Il faut payer une rançon pour récupérer vos données.",
-                                   "OS -2", true, ComputerLayer.OS, 2, new Color(255, 0, 0));
-
-
-
-            Card ddos = new Card("DDOS", "Une attaque DDoS vise à rendre un serveur indisponible en surchargeant la bande passante du serveur ou en accaparant ses ressources jusqu'à épuisement.",
-                                   "HARDWARE -4", true, ComputerLayer.HARDWARE, 4, new Color(255, 0, 0));
-
-            Card scan = new Card("SCAN", "Le scanner analyse les éléments de votre ordinateur.",
-                                   "SOFTWARE +1", false, ComputerLayer.SOFTWARE, 1, new Color(0, 176, 240));
-
-            Card vpn = new Card("VPN", "Le VPN est un tunnel sécurisé à l’intérieur d’un réseau.",
-                                   "SOFTWARE +2", false, ComputerLayer.SOFTWARE, 2, new Color(0, 176, 240));
-
-            tempCardsDeck.addCard(trojan);
-            tempCardsDeck.addCard(virusCrypto);
-            tempCardsDeck.addCard(ddos);
-            tempCardsDeck.addCard(scan);
-            tempCardsDeck.addCard(vpn);
-
-            //tempCardsDeck.addCard(card);
-        }
-            
-    }
-
     
 
     void getAllOfThePlayersInAList()
     {        
-        
+        // Vérifie si on n'a bien récupérer tous les joueurs en comparant le nombre de joueurs du lobby et la liste où on a récupéré les joueurs
         if (playersInGame.Count != numberOfPlayersInTheGame)
             playersInGame = new List<GameObject>(GameObject.FindGameObjectsWithTag("player"));
 
-        arbiter = arbiterControllerGameObject.GetComponent<ArbiterController>();
-        arbiter.numberOfPlayersInTheGame = Prototype.NetworkLobby.LobbyPlayerList.numberOfPlayerInTheRoom;
-        arbiter.distributeCards(playersInGame);
+        //arbiter = arbiterControllerGameObject.GetComponent<ArbiterController>();
+        //TODO nombre de joueurs à récupérer quelques part
+        numberOfPlayersInLobby = Prototype.NetworkLobby.LobbyPlayerList.numberOfPlayerInTheRoom;
+        //arbiter.distributeCards(playersInGame);
 
         areAllPlayersHere = true;
     }
@@ -654,6 +619,7 @@ public class PlayerController : NetworkBehaviour
         {
             showMyCardsCanvas.gameObject.SetActive(true);
             mainCanvas.gameObject.SetActive(false);
+            cardsDeckScriptFromThePlayer.showCardInformations();
         }
         else
         {
@@ -857,9 +823,6 @@ public class PlayerController : NetworkBehaviour
     }
     #endregion
 
-
-    
-
     #region Méthodes liées aux tours
 
     [Command]
@@ -992,6 +955,28 @@ public class PlayerController : NetworkBehaviour
             if (pair.Value.name == "Virus(Clone)")
             {
                 numberOfSpawnedVirus++;
+            }
+        }
+    }
+
+    [Command]
+    public void CmdSetGameOverForAllPlayers()
+    {
+        RpcSetGameOverForAllPlayers();
+    }
+
+
+    [ClientRpc]
+    public void RpcSetGameOverForAllPlayers()
+    {
+        Dictionary<NetworkInstanceId, NetworkIdentity> playersDico = NetworkServer.objects;
+        ComputerHealth health;
+        foreach (var pair in playersDico)
+        {
+            if (pair.Value.name == "Player(Clone)")
+            {
+                health = pair.Value.gameObject.GetComponent<ComputerHealth>();
+                health.gameOver();
             }
         }
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 
 public class ComputerHealth : NetworkBehaviour {
     
@@ -13,8 +14,11 @@ public class ComputerHealth : NetworkBehaviour {
     public int currentSoftwareHealth = (int)Constants.SOFTWARE_MAX_HEALTH;
     [SyncVar(hook = "onChangeHardwareHealth")]
     public int currentHardwareHealth = (int)Constants.HARWARE_MAX_HEALTH;
+    [SyncVar]
+    public int remainingLife = (int)Constants.OS_MAX_HEALTH + (int)Constants.SOFTWARE_MAX_HEALTH + (int)Constants.HARWARE_MAX_HEALTH;
 
     public float size = 0;
+
 
     [SerializeField]
     private RectTransform osHealthBar;
@@ -28,6 +32,10 @@ public class ComputerHealth : NetworkBehaviour {
     private RectTransform softwareHealthBar2;
     [SerializeField]
     private RectTransform hardwareHealthBar2;
+    [SerializeField]
+    private Canvas gameOverCanvas;
+    [SerializeField]
+    private Text gameStateText;
 
 
     //Unité d'une vie par rapport à la taille de la barre de vie totale
@@ -70,9 +78,7 @@ public class ComputerHealth : NetworkBehaviour {
                     currentHardwareHealth = updateIfItIsLessThanTheMaximumHealth(currentHardwareHealth + amount);
                 break;
         }
-        Debug.Log("Current OS health : " + currentOsHealth);
-        Debug.Log("Current hard health : " + currentHardwareHealth);
-        Debug.Log("Current soft health : " + currentSoftwareHealth);
+
         if (currentOsHealth <= 0)
             currentOsHealth = 0;
         if (currentSoftwareHealth <= 0)
@@ -80,12 +86,12 @@ public class ComputerHealth : NetworkBehaviour {
         if (currentHardwareHealth <= 0)
             currentHardwareHealth = 0;
 
-        int remainingLife = currentOsHealth + currentSoftwareHealth + currentHardwareHealth;
+        remainingLife = currentOsHealth + currentSoftwareHealth + currentHardwareHealth;
 
-        if (remainingLife <= 0)
+        /*if (remainingLife <= 0)
         {
-            Debug.Log("La partie est terminée, une équipe a perdu");
-        }
+            gameOver();
+        }*/
             
     }
 
@@ -131,7 +137,25 @@ public class ComputerHealth : NetworkBehaviour {
     void onChangeHardwareHealth(int health) { resizeHealthBar(ComputerLayer.HARDWARE, health); }
     void onChangeSoftwareHealth(int health) { resizeHealthBar(ComputerLayer.SOFTWARE, health); }
 
-    void Update()
+
+    //Opérations à faire lorsque la partie est terminée
+    public void gameOver()
     {
+        if(remainingLife <= 0)
+        {
+            gameOverCanvas.gameObject.SetActive(true);
+            gameStateText.text = "VOUS AVEZ PERDU !";
+        }
+        else
+        {
+            gameOverCanvas.gameObject.SetActive(true);
+            gameStateText.text = "VOUS AVEZ GAGNE !";
+        }
     }
+
+    public void onClickBackToMenu()
+    {
+        SceneManager.LoadScene("Menu");
+    }
+    
 }

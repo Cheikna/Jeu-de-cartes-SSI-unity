@@ -53,6 +53,13 @@ public class VirusController : MonoBehaviour {
             if (!targetLayer2.Equals(null) && damageLayer2 > 0)
                 computerHealth.setHealth(targetLayer2, damageLayer2);
 
+            if (computerHealth.remainingLife <= 0)
+            {
+                computerHealth.gameOver();
+                if (playerController != null)
+                    playerController.CmdSetGameOverForAllPlayers();
+            }
+
         }
 
         
