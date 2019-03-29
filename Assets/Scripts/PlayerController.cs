@@ -132,6 +132,8 @@ public class PlayerController : NetworkBehaviour
     [SyncVar]
     int numberOfBallsFired = 0; // Lorsque 2 balles sont lancées (c'est-à-dire que les 2 équipes ont lancé chacun une balle) alors cela signifie qu'il y a eu un tour
     [SyncVar]
+    int numberOfBallsFiredByMyTeam = (int)Constants.NUMBER_BASE_OF_CARDS_PLAYED_BY_EACH_TEAM;
+    [SyncVar]
     string allCardsTitleInString = "";
     [SyncVar]
     string allMyCardsTitleString = "";
@@ -143,14 +145,17 @@ public class PlayerController : NetworkBehaviour
     bool allPlayersHaveChosenTheirCharacters = false;
     [SyncVar]
     bool playersCanStartToPlay = false;
+    [SyncVar]
+    int firstTeamWhichPlays = 1;
     #endregion
 
     IEnumerator WaitFewSecondsBeforeDistribuingCards()
     {
         yield return new WaitForSeconds(1.5f);
 
-        if(hasAuthority)
-            CmdCardDistributionFromPlayer();
+        // TODO distribution de cartes
+        /*if(hasAuthority)
+            CmdCardDistributionFromPlayer();*/
 
         turnsFollower.gameObject.SetActive(true);
     }
@@ -321,8 +326,34 @@ public class PlayerController : NetworkBehaviour
     {
         if(isLocalPlayer)
         {
-            if (card != null)
-                tempCardsDeck.addCard(card);
+            Card trojan = new Card("Trojan",
+                                      "Le cheval de Troie est un logiciel en apparence légitime, mais qui contient une fonctionnalité malveillante.C’est un virus statique.",
+                                      "SOFTWARE -2", true, ComputerLayer.SOFTWARE, 2, new Color(255, 0, 0));
+
+
+
+            Card virusCrypto = new Card("VIRUS\nCRYPTOLOCKER",
+                                   " Alors que vous allumez votre ordinateur pour consulter vos mails, un message apparait. Il faut payer une rançon pour récupérer vos données.",
+                                   "OS -2", true, ComputerLayer.OS, 2, new Color(255, 0, 0));
+
+
+
+            Card ddos = new Card("DDOS", "Une attaque DDoS vise à rendre un serveur indisponible en surchargeant la bande passante du serveur ou en accaparant ses ressources jusqu'à épuisement.",
+                                   "HARDWARE -4", true, ComputerLayer.HARDWARE, 4, new Color(255, 0, 0));
+
+            Card scan = new Card("SCAN", "Le scanner analyse les éléments de votre ordinateur.",
+                                   "SOFTWARE +1", false, ComputerLayer.SOFTWARE, 1, new Color(0, 176, 240));
+
+            Card vpn = new Card("VPN", "Le VPN est un tunnel sécurisé à l’intérieur d’un réseau.",
+                                   "SOFTWARE +2", false, ComputerLayer.SOFTWARE, 2, new Color(0, 176, 240));
+
+            tempCardsDeck.addCard(trojan);
+            tempCardsDeck.addCard(virusCrypto);
+            tempCardsDeck.addCard(ddos);
+            tempCardsDeck.addCard(scan);
+            tempCardsDeck.addCard(vpn);
+
+            //tempCardsDeck.addCard(card);
         }
 
     }
@@ -417,7 +448,7 @@ public class PlayerController : NetworkBehaviour
             GetComponent<ComputerHealth>().setHealth(cardPlayedByThePlayer.touchedLayer, cardPlayedByThePlayer.getDamage(), false);
         }
 
-        RpcIncreaseNumberOfTurns();
+        RpcIncreaseNumberOfTurns(teamNumber);
     }
 
     [Command]
@@ -833,13 +864,13 @@ public class PlayerController : NetworkBehaviour
     #region Méthodes liées aux tours
 
     [Command]
-    public void CmdIncreaseNumberOfTurns()
+    public void CmdIncreaseNumberOfTurns(int teamNumberOfWhoseFired)
     {
-        RpcIncreaseNumberOfTurns();
+        RpcIncreaseNumberOfTurns(teamNumberOfWhoseFired);
     }
 
     [ClientRpc]
-    public void RpcIncreaseNumberOfTurns()
+    public void RpcIncreaseNumberOfTurns(int teamNumberOfWhoseFired)
     {
 
         Dictionary<NetworkInstanceId, NetworkIdentity> playersDico = NetworkServer.objects;
@@ -849,7 +880,7 @@ public class PlayerController : NetworkBehaviour
             if (pair.Value.name == "Player(Clone)")
             {
                 p = pair.Value.gameObject.GetComponent<PlayerController>();
-                p.setNumberOTurns();
+                p.setNumberOfTurns();
             }
         }
 
@@ -861,10 +892,93 @@ public class PlayerController : NetworkBehaviour
     }
 
     //Le nombre de tour n'augmente que de 1, donc pas besoin de passer d'arguments en paramètre
-    public void setNumberOTurns()
+    public void setNumberOfTurns()
     {
         numberOfBallsFired++;
     }
+
+    [Command]
+    public void CmdSetNumberOfBallsFiredByMyTeam(Constants action, int teamWhoFiredTheBalls)
+    {
+        RpcSetNumberOfBallsFiredByMyTeam(action, teamWhoFiredTheBalls);
+    }
+
+
+    [ClientRpc]
+    public void RpcSetNumberOfBallsFiredByMyTeam(Constants action, int teamWhoFiredTheBalls)
+    {
+        Dictionary<NetworkInstanceId, NetworkIdentity> playersDico = NetworkServer.objects;
+        PlayerController p;
+        foreach (var pair in playersDico)
+        {
+            if (pair.Value.name == "Player(Clone)")
+            {
+                p = pair.Value.gameObject.GetComponent<PlayerController>();
+                p.setNumberOfBallsFiredByMyTeam(action, teamWhoFiredTheBalls);
+            }
+        }
+    }
+
+    public void setNumberOfBallsFiredByMyTeam(Constants action, int team)
+    {
+        if(teamNumber == team)
+        {
+            if(action == Constants.ADD)
+            {
+                numberOfBallsFiredByMyTeam++;
+            }
+            else if(action == Constants.RESET)
+            {
+                numberOfBallsFiredByMyTeam = (int)Constants.NUMBER_BASE_OF_CARDS_PLAYED_BY_EACH_TEAM;
+            }
+        }
+        else
+        {
+            numberOfBallsFiredByMyTeam = (int)Constants.NUMBER_BASE_OF_CARDS_PLAYED_BY_EACH_TEAM;
+        }
+    }
+
+
+    public int getNumberOfBallsFiredByMyTeam()
+    {
+        return numberOfBallsFiredByMyTeam;
+    }
+
+    [Command]
+    public void CmdSetFirstTeamWhichPlays()
+    {
+        RpcSetFirstTeamWhichPlays();
+    }
+
+
+    [ClientRpc]
+    public void RpcSetFirstTeamWhichPlays()
+    {
+        int firstTeamToPlay = 1;
+        Dictionary<NetworkInstanceId, NetworkIdentity> playersDico = NetworkServer.objects;
+        PlayerController p;
+        foreach (var pair in playersDico)
+        {
+            if (pair.Value.name == "Player(Clone)")
+            {
+                p = pair.Value.gameObject.GetComponent<PlayerController>();
+                p.setFirstTeamWhichPlays(firstTeamToPlay);
+            }
+        }
+    }
+
+    public void setFirstTeamWhichPlays(int firstTeamToPlay)
+    {
+        if (teamNumber == firstTeamToPlay)
+        {
+            isItMyTurnHook = true;
+        }
+        else
+        {
+            isItMyTurnHook = false;
+        }
+    }
+
     #endregion
 
 
@@ -881,6 +995,5 @@ public class PlayerController : NetworkBehaviour
                 numberOfSpawnedVirus++;
             }
         }
-        Debug.Log("Nombre de virus spawn : " + numberOfSpawnedVirus);
     }
 }

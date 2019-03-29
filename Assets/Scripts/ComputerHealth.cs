@@ -5,10 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.Networking;
 
 public class ComputerHealth : NetworkBehaviour {
-
-    /*const int osMaxHealth = 6;
-    const int softwareMaxHealth = 6;
-    const int hardwareMaxHealth = 6;*/
+    
 
     [SyncVar(hook = "onChangeOsHealth")]
     public int currentOsHealth = (int)Constants.OS_MAX_HEALTH;

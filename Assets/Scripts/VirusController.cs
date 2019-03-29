@@ -25,15 +25,22 @@ public class VirusController : MonoBehaviour {
         var computerHit = collision.gameObject;
         var computerHealth = computerHit.GetComponent<ComputerHealth>();
         var playerController = computerHit.GetComponent<PlayerController>();
+        bool isItTimeToChangeTeam = false;
 
         // Récupération du joueur qui a instancié le virus, celui qui en est à l'origine afin de dire qu'il vient de jouer
         if (playerWhoFiredTheVirus != null)
         {
-            playerWhoFiredTheVirus.setIsItMyTurnHook(false);
+            playerWhoFiredTheVirus.CmdSetNumberOfBallsFiredByMyTeam(Constants.ADD, playerWhoFiredTheVirus.getTeamNumber());
+            isItTimeToChangeTeam = (playerWhoFiredTheVirus.getNumberOfBallsFiredByMyTeam() == (int)Constants.NUMBER_MAX_OF_CARDS_PLAYED_BY_EACH_TEAM);
+            if(isItTimeToChangeTeam)
+            {
+                playerWhoFiredTheVirus.setIsItMyTurnHook(false);
+                playerWhoFiredTheVirus.CmdSetNumberOfBallsFiredByMyTeam(Constants.RESET, playerWhoFiredTheVirus.getTeamNumber());
+            }
         }
 
 
-        if(playerController != null)
+        if(playerController != null && isItTimeToChangeTeam)
         {
             playerController.setIsItMyTurnHook(true);
         }
