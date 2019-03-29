@@ -6,8 +6,8 @@ using UnityEngine.UI;
 
 public class CardsDeck : MonoBehaviour {
 
-    [SerializeField]
-    private TemporaryCardsDeck tempDeck;
+    //[SerializeField]
+    //private TemporaryCardsDeck tempDeck;
     [SerializeField]
     private CardPlayed cardPlayed;
 
@@ -47,8 +47,7 @@ public class CardsDeck : MonoBehaviour {
     IEnumerator WaitBeforeLoadingMyCardsDeck()
     {
         yield return new WaitForSeconds(1.0f);
-        cardsDeck = tempDeck.getCards();
-        indexOfCard = 0;
+        //cardsDeck = tempDeck.getCards();
         numberOfCards = cardsDeck.Count;
         showCardInformations();
 

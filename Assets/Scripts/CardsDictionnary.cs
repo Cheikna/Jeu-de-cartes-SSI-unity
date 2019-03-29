@@ -4,9 +4,11 @@ using UnityEngine;
 
 public class CardsDictionnary {
 
-    public static Dictionary<string, Card> getCardsDictionnary()
-    {
-        Dictionary<string, Card> cardsDictionary = new Dictionary<string, Card>();
+    private static Dictionary<string, Card> cardsDictionary = new Dictionary<string, Card>();
+    private static List<string> dictionaryKeys = new List<string>();
+
+    public static Dictionary<string, Card> loadCardsDictionnary()
+    {        
 
         //Initialisation de toutes les cartes du jeu
         Card trojan = new Card("TROJAN",
@@ -32,11 +34,17 @@ public class CardsDictionnary {
 
         //Ajout des cartes à au dictionnaire
         cardsDictionary.Add("trojan", trojan);
+        dictionaryKeys.Add("trojan");
         cardsDictionary.Add("virusCrypto", virusCrypto);
+        dictionaryKeys.Add("virusCrypto");
         cardsDictionary.Add("trojanPlus", trojanPlus);
+        dictionaryKeys.Add("trojanPlus");
         cardsDictionary.Add("ddos", ddos);
+        dictionaryKeys.Add("ddos");
         cardsDictionary.Add("scan", scan);
+        dictionaryKeys.Add("scan");
         cardsDictionary.Add("vpn", vpn);
+        dictionaryKeys.Add("vpn");
 
 
 
@@ -44,7 +52,7 @@ public class CardsDictionnary {
         return cardsDictionary;
     }
 
-    public static Dictionary<int, Card> getCardsDictionnaryForDistribution()
+    /*public static Dictionary<int, Card> getCardsDictionnaryForDistribution()
     {
         Dictionary<int, Card> cardsDictionary = new Dictionary<int, Card>();
 
@@ -56,6 +64,19 @@ public class CardsDictionnary {
         }
 
         return cardsDictionary;
+    }*/
+
+    public static Card getRandomCard()
+    {
+        Card card = null;
+        int rdn = 0;
+
+        if(dictionaryKeys.Count > 0)
+            rdn = Random.Range(0, dictionaryKeys.Count);
+
+        string key = dictionaryKeys[rdn];
+        card = cardsDictionary[key];
+        return card;
     }
 
 

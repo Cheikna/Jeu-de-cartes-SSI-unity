@@ -20,6 +20,7 @@ public class PlayerController : NetworkBehaviour
     public bool testMode = true;
     Dictionary<NetworkInstanceId, NetworkIdentity> playersInTeam1Dico;
     Dictionary<NetworkInstanceId, NetworkIdentity> playersInTeam2Dico;
+    CardsDeck cardsDeck;
 
 
     #region variables getters;setters
@@ -35,7 +36,7 @@ public class PlayerController : NetworkBehaviour
     [SerializeField]
     private GameObject arbiterControllerGameObject;
     [SerializeField]
-    TemporaryCardsDeck tempCardsDeck;    
+    TemporaryCardsDeck tempCardsDeck;
     [SerializeField]
     private TurnsFollower turnsFollower;
     [SerializeField]
