@@ -98,7 +98,7 @@ public class PlayerController : NetworkBehaviour
 
     #region SynVars
     [SyncVar]
-    private bool isItMyTurnHook = false;
+    public bool isItMyTurnHook = true;
     [SyncVar]
     private string playerName = "";
     [SyncVar]
@@ -106,7 +106,7 @@ public class PlayerController : NetworkBehaviour
     [SyncVar]
     string hatColor = "";
     [SyncVar]
-    private int teamNumber = 0;
+    public int teamNumber = 0;
     [SyncVar]
     private Transform myPosition;
     private char regexTeam = '>';
@@ -240,9 +240,10 @@ public class PlayerController : NetworkBehaviour
     {
         /*if (isLocalPlayer)
             CmdSetIsItMyTurnHookForAllMyTeam(teamNumber, isItMyTurnHook);*/
-        if (!isServer)
-            return;
-        this.isItMyTurnHook = isItMyTurnHook;
+        /*if (!isServer)
+            return;*/
+        if(isLocalPlayer)
+            this.isItMyTurnHook = isItMyTurnHook;
     }
 
     public bool getIsItMyTurnHook()
@@ -793,6 +794,12 @@ public class PlayerController : NetworkBehaviour
             }
         }
 
+        if(allPlayersHaveATeam)
+        {
+            //TODO set the is turnhook for all
+            turnsFollower.setPlayersIsItMyTurnHook();
+        }
+
         return allPlayersHaveATeam;
     }
 
@@ -906,7 +913,7 @@ public class PlayerController : NetworkBehaviour
         return numberOfBallsFiredByMyTeam;
     }
 
-    [Command]
+    /*[Command]
     public void CmdSetFirstTeamWhichPlays()
     {
         RpcSetFirstTeamWhichPlays();
@@ -931,15 +938,19 @@ public class PlayerController : NetworkBehaviour
 
     public void setFirstTeamWhichPlays(int firstTeamToPlay)
     {
-        if (teamNumber == firstTeamToPlay)
+        if(isLocalPlayer)
         {
-            isItMyTurnHook = true;
+            if (teamNumber == firstTeamToPlay)
+            {
+                isItMyTurnHook = true;
+            }
+            else
+            {
+                isItMyTurnHook = false;
+            }
         }
-        else
-        {
-            isItMyTurnHook = false;
-        }
-    }
+        
+    }*/
 
     #endregion
 

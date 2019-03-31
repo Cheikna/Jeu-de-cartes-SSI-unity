@@ -13,8 +13,7 @@ public class TurnsFollower : NetworkBehaviour {
     int indexPlayerWhoPlays = -1;
 
 	// Use this for initialization
-	void Start () {
-        
+	void Start () {       
 
         players = new List<PlayerController>();
         StartCoroutine(GetAllOfThePlayersAfterFewSeconds());
@@ -26,6 +25,7 @@ public class TurnsFollower : NetworkBehaviour {
 
         Dictionary<NetworkInstanceId, NetworkIdentity> playersDico = NetworkServer.objects;
         PlayerController p;
+
         foreach (var pair in playersDico)
         {
             if (pair.Value.name == "Player(Clone)")
@@ -34,9 +34,30 @@ public class TurnsFollower : NetworkBehaviour {
                 p = pair.Value.gameObject.GetComponent<PlayerController>();
                 players.Add(p);
             }
-        }
+        }        
         //players[0].setIsItMyTurnHook(true);
-        players[0].CmdSetFirstTeamWhichPlays();
+        //players[0].CmdSetFirstTeamWhichPlays();
+    }
+
+    public void setPlayersIsItMyTurnHook()
+    {
+        Dictionary<NetworkInstanceId, NetworkIdentity> playersDico = NetworkServer.objects;
+        PlayerController player;
+        int firstTeamToPlay = 1;
+
+        foreach (var pair in playersDico)
+        {
+            if (pair.Value.name == "Player(Clone)")
+            {
+                player = pair.Value.gameObject.GetComponent<PlayerController>();
+                Debug.Log("team : " + player.getTeamNumber());
+                Debug.Log("team : " + player.teamNumber);
+                if (player.teamNumber == firstTeamToPlay)
+                    player.setIsItMyTurnHook(true);
+                else
+                    player.setIsItMyTurnHook(false);
+            }
+        }
     }
 
     
