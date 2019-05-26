@@ -13,13 +13,18 @@ public class VirusController : MonoBehaviour {
 
     public ComputerLayer targetLayer2 { get; set; }
     public int damageLayer2 { get; set; }
-    public PlayerController playerWhoFiredTheVirus { get; set; }
+    public PlayerController playerWhoFiredTheVirus;
     public int numberOfTeamWhoFiredTheVirus { get; set; }
     int teamNumberOfTheTouchedPlayer = 0;
 
 
+    public void setPlayerWhoFiredTheVirus(PlayerController player)
+    {
+        playerWhoFiredTheVirus = player;
+        Debug.Log("====> (player == null) : " + (player == null));
+    }
 
-    
+
     void OnTriggerEnter(Collider collision)
     {
         var computerHit = collision.gameObject;
@@ -27,6 +32,8 @@ public class VirusController : MonoBehaviour {
         var playerController = computerHit.GetComponent<PlayerController>();
         bool isItTimeToChangeTeam = false;
 
+
+        Debug.Log("======== playerWhoFiredTheVirus != null : " + (playerWhoFiredTheVirus != null));
         // Récupération du joueur qui a instancié le virus, celui qui en est à l'origine afin de dire qu'il vient de jouer
         if (playerWhoFiredTheVirus != null)
         {
@@ -53,11 +60,13 @@ public class VirusController : MonoBehaviour {
             if (!targetLayer2.Equals(null) && damageLayer2 > 0)
                 computerHealth.setHealth(targetLayer2, damageLayer2);
 
+            Debug.Log("===> computerHealth.remainingLife : " + computerHealth.remainingLife);
             if (computerHealth.remainingLife <= 0)
             {
                 computerHealth.gameOver();
-                if (playerController != null)
-                    playerController.CmdSetGameOverForAllPlayers();
+                //playerWhoFiredTheVirus.GetComponent<ComputerHealth>().gameOver();
+                //if (playerController != null)
+                    playerWhoFiredTheVirus.CmdSetGameOverForAllPlayers();
             }
 
         }

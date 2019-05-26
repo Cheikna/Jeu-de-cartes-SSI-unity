@@ -8,6 +8,7 @@ using UnityEngine.SceneManagement;
 public class ComputerHealth : NetworkBehaviour {
     
 
+    private int maxHealth = Mathf.Max((int)Constants.OS_MAX_HEALTH, Mathf.Max((int)Constants.SOFTWARE_MAX_HEALTH, (int)Constants.HARWARE_MAX_HEALTH));
     [SyncVar(hook = "onChangeOsHealth")]
     public int currentOsHealth = (int)Constants.OS_MAX_HEALTH;
     [SyncVar(hook = "onChangeSoftwareHealth")]
@@ -97,7 +98,7 @@ public class ComputerHealth : NetworkBehaviour {
 
     public int updateIfItIsLessThanTheMaximumHealth(int health)
     {
-        return (health > 6) ? 6 : health;
+        return (health > maxHealth) ? maxHealth : health;
     }
 
 
@@ -141,13 +142,18 @@ public class ComputerHealth : NetworkBehaviour {
     //Opérations à faire lorsque la partie est terminée
     public void gameOver()
     {
-        if(remainingLife <= 0)
+        if (!isLocalPlayer)
+            return;
+
+        if (remainingLife <= 0)
         {
+            //SceneManager.LoadScene("GameOverLoose");
             gameOverCanvas.gameObject.SetActive(true);
             gameStateText.text = "VOUS AVEZ PERDU !";
         }
         else
         {
+            //SceneManager.LoadScene("GameOverWin");
             gameOverCanvas.gameObject.SetActive(true);
             gameStateText.text = "VOUS AVEZ GAGNE !";
         }

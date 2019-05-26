@@ -388,10 +388,10 @@ public class PlayerController : NetworkBehaviour
         if (cardPlayedByThePlayer.isAttackCard)
         {
             var virus = (GameObject)Instantiate(virusPrefab, virusSpawn.position, virusSpawn.rotation);
+            virus.GetComponent<VirusController>().setPlayerWhoFiredTheVirus(this);
             var virusEffects = virus.GetComponent<VirusController>();
             virusEffects.targetLayer1 = cardPlayedByThePlayer.touchedLayer;
             virusEffects.damageLayer1 = cardPlayedByThePlayer.getDamage();
-            virusEffects.playerWhoFiredTheVirus = this;
             virusEffects.numberOfTeamWhoFiredTheVirus = this.teamNumber;
 
             //Changer la couleur de la balle pour qu'elle soit de la même couleur que la carte
@@ -986,8 +986,9 @@ public class PlayerController : NetworkBehaviour
         {
             if (pair.Value.name == "Player(Clone)")
             {
-                health = pair.Value.gameObject.GetComponent<ComputerHealth>();
-                health.gameOver();
+                pair.Value.gameObject.GetComponent<PlayerController>().GetComponent<ComputerHealth>().gameOver();
+                /*health = pair.Value.gameObject.GetComponent<ComputerHealth>();
+                health.gameOver();*/
             }
         }
     }
