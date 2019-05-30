@@ -312,6 +312,11 @@ Prefab:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 114825146856265640, guid: c1c6cee10a4e56146a3ec5d613d790a5,
+        type: 2}
+      propertyPath: m_IgnoreReversedGraphics
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c1c6cee10a4e56146a3ec5d613d790a5, type: 2}
   m_IsPrefabAsset: 0

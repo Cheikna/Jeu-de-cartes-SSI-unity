@@ -8018,10 +8018,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8f08615806d6bb4a9b7859aeb664c70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentOsHealth: 6
-  currentSoftwareHealth: 6
-  currentHardwareHealth: 6
-  remainingLife: 18
   size: 0
   osHealthBar: {fileID: 224695043400878866}
   softwareHealthBar: {fileID: 224577272999671984}
@@ -10851,7 +10847,11 @@ MonoBehaviour:
   maleCharacter: {fileID: 4598598924858394}
   chooseTeamCanvas: {fileID: 223354256807899156}
   numberOfTurnsCanvas: {fileID: 223397697691792200}
+  isItMyTurnHook: 1
+  teamNumber: 0
   teamsMembers: 
+  id: 0
+  isGameEnded: 0
 --- !u!114 &114946099404945450
 MonoBehaviour:
   m_ObjectHideFlags: 1

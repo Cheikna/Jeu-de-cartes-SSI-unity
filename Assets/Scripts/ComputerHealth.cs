@@ -10,13 +10,13 @@ public class ComputerHealth : NetworkBehaviour {
 
     private int maxHealth = Mathf.Max((int)Constants.OS_MAX_HEALTH, Mathf.Max((int)Constants.SOFTWARE_MAX_HEALTH, (int)Constants.HARWARE_MAX_HEALTH));
     [SyncVar(hook = "onChangeOsHealth")]
-    public int currentOsHealth = (int)Constants.OS_MAX_HEALTH;
+    private int currentOsHealth = (int)Constants.OS_MAX_HEALTH;
     [SyncVar(hook = "onChangeSoftwareHealth")]
-    public int currentSoftwareHealth = (int)Constants.SOFTWARE_MAX_HEALTH;
+    private int currentSoftwareHealth = (int)Constants.SOFTWARE_MAX_HEALTH;
     [SyncVar(hook = "onChangeHardwareHealth")]
-    public int currentHardwareHealth = (int)Constants.HARWARE_MAX_HEALTH;
+    private int currentHardwareHealth = (int)Constants.HARWARE_MAX_HEALTH;
     [SyncVar]
-    public int remainingLife = (int)Constants.OS_MAX_HEALTH + (int)Constants.SOFTWARE_MAX_HEALTH + (int)Constants.HARWARE_MAX_HEALTH;
+    private int remainingLife = (int)Constants.OS_MAX_HEALTH + (int)Constants.SOFTWARE_MAX_HEALTH + (int)Constants.HARWARE_MAX_HEALTH;
 
     public float size = 0;
 
@@ -163,5 +163,10 @@ public class ComputerHealth : NetworkBehaviour {
     {
         SceneManager.LoadScene("Menu");
     }
-    
+
+    public int getRemainingLife()
+    {
+        return remainingLife;
+    }
+
 }
