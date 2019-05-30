@@ -147,16 +147,24 @@ public class ComputerHealth : NetworkBehaviour {
 
         if (remainingLife <= 0)
         {
-            //SceneManager.LoadScene("GameOverLoose");
-            gameOverCanvas.gameObject.SetActive(true);
-            gameStateText.text = "VOUS AVEZ PERDU !";
+            showLooseScreen();            
         }
         else
         {
-            //SceneManager.LoadScene("GameOverWin");
-            gameOverCanvas.gameObject.SetActive(true);
-            gameStateText.text = "VOUS AVEZ GAGNE !";
+            showWinScreen();            
         }
+    }
+
+    public void showLooseScreen()
+    {
+        gameOverCanvas.gameObject.SetActive(true);
+        gameStateText.text = "VOUS AVEZ PERDU !";
+    }
+
+    public void showWinScreen()
+    {
+        gameOverCanvas.gameObject.SetActive(true);
+        gameStateText.text = "VOUS AVEZ GAGNE !";
     }
 
     public void onClickBackToMenu()

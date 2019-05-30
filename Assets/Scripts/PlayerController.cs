@@ -229,6 +229,11 @@ public class PlayerController : NetworkBehaviour
                     confirmCardButton.interactable = false;
                 }
 
+                if(numberOfTurns > maxNumberOfTurns)
+                {
+                    //TODO
+                }
+
                 //Notifier tous les joueurs de la partie que l'on a perdu
                 // La deuxième condition permet de notifier les joueurs une unique fois
                 if (myHealth.getRemainingLife() <= 0 && !hasPlayerBeenNotifiedForGameOver)
