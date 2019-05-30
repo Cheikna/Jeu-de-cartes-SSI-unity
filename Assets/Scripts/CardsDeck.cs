@@ -72,10 +72,10 @@ public class CardsDeck : MonoBehaviour {
         GetComponentInParent<PlayerController>().shootFromCardsDeckClass(card.getCardinfosInAStringArray());
     }
 
-    public void passMyTurn()
+    /*public void passMyTurn()
     {
         GetComponentInParent<PlayerController>().setIsItMyTurnHook(false);
-    }
+    }*/
 
     public void onClickNextCard()
     {

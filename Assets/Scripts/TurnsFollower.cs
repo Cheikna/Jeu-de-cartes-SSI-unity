@@ -5,7 +5,7 @@ using UnityEngine.Networking;
 
 public class TurnsFollower : NetworkBehaviour {
 
-    List<PlayerController> players;
+    /*List<PlayerController> players;
     PlayerController currentPlayer;
 
     public int numberOfPlayersExpected { get; set; }
@@ -80,5 +80,5 @@ public class TurnsFollower : NetworkBehaviour {
     IEnumerator WaitBeforeChangingPlayer()
     {
         yield return new WaitForSeconds(2.0f);
-    }
+    }*/
 }
