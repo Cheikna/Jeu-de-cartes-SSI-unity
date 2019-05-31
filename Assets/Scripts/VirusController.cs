@@ -1,42 +1,46 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
-public class VirusController : MonoBehaviour {
-
-
+public class VirusController : NetworkBehaviour
+{
     public ComputerLayer targetLayer1 { get; set; }
     // Dégats occasionnés
     public int damageLayer1 { get; set; }
 
     public ComputerLayer targetLayer2 { get; set; }
     public int damageLayer2 { get; set; }
-    public PlayerController playerWhoFiredTheVirus { get; set; }
-    public int numberOfTeamWhoFiredTheVirus { get; set; }
-    int teamNumberOfTheTouchedPlayer = 0;
-
-
+    //public int numberOfTeamWhoFiredTheVirus { get; set; }
+    //int teamNumberOfTheTouchedPlayer = 0;
 
 
     void OnTriggerEnter(Collider collision)
     {
         var computerHit = collision.gameObject;
         var computerHealth = computerHit.GetComponent<ComputerHealth>();
-        var playerController = computerHit.GetComponent<PlayerController>();
+        //var playerController = computerHit.GetComponent<PlayerController>();
+        //bool isItTimeToChangeTeam = false;
 
         // Récupération du joueur qui a instancié le virus, celui qui en est à l'origine afin de dire qu'il vient de jouer
-        if (playerWhoFiredTheVirus != null)
+        /*if (playerWhoFiredTheVirus != null)
         {
-            playerWhoFiredTheVirus.setIsItMyTurnHook(false);
-        }
+            playerWhoFiredTheVirus.CmdSetNumberOfBallsFiredByMyTeam(Constants.ADD, playerWhoFiredTheVirus.getTeamNumber());
+            isItTimeToChangeTeam = (playerWhoFiredTheVirus.getNumberOfBallsFiredByMyTeam() == (int)Constants.NUMBER_MAX_OF_CARDS_PLAYED_BY_EACH_TEAM);
+            if(isItTimeToChangeTeam)
+            {
+                playerWhoFiredTheVirus.setIsItMyTurnHook(false);
+                playerWhoFiredTheVirus.CmdSetNumberOfBallsFiredByMyTeam(Constants.RESET, playerWhoFiredTheVirus.getTeamNumber());
+            }
+        }*/
 
 
-        if(playerController != null)
+        /*if(playerController != null && isItTimeToChangeTeam)
         {
             playerController.setIsItMyTurnHook(true);
-        }
+        }*/
 
         if (computerHealth != null)
         {
@@ -46,9 +50,19 @@ public class VirusController : MonoBehaviour {
             if (!targetLayer2.Equals(null) && damageLayer2 > 0)
                 computerHealth.setHealth(targetLayer2, damageLayer2);
 
+            /*if (computerHealth.remainingLife <= 0)
+            {
+                computerHealth.gameOver();
+                //playerWhoFiredTheVirus.GetComponent<ComputerHealth>().gameOver();
+                //if (playerController != null)
+                    //playerWhoFiredTheVirus.CmdSetGameOverForAllPlayers();
+            }*/
+
         }
 
 
         Destroy(gameObject);
     }
+
+
 }

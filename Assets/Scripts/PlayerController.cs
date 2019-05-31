@@ -5,24 +5,23 @@ using UnityEngine.Networking;
 using UnityEngine.UI;
 using System.Text.RegularExpressions;
 using UnityEngine.Networking.NetworkSystem;
+using System;
 
 public class PlayerController : NetworkBehaviour
 {
 
-    List<GameObject> playersInGame;
-    [SerializeField]
-    private GameObject arbiterControllerGameObject;
-    ArbiterController arbiter;
+    List<GameObject> playersInGame = new List<GameObject>();
     bool areAllPlayersHere = false;
     int indexPlayerWhoPlays = 0;
     List<Card> myCardsDeck = new List<Card>();
-    const int minNumberOfPlayersPerTeam = 1;
     int numberOfPeopleInTeam1 = 0;
     int numberOfPeopleInTeam2 = 0;
+    int numberOfPlayersInLobby = 0;
     public bool testMode = true;
     Dictionary<NetworkInstanceId, NetworkIdentity> playersInTeam1Dico;
     Dictionary<NetworkInstanceId, NetworkIdentity> playersInTeam2Dico;
-
+    private bool hasGameOverScreenBeenDisplayed = false;
+    private ComputerHealth myHealth;
 
     #region variables getters;setters
     public bool isGameOver { get; set; }
@@ -36,12 +35,8 @@ public class PlayerController : NetworkBehaviour
     #region SerializeField - permet d'attribuer des valeurs à ces atttributs via Unity directement
     [SerializeField]
     private GameObject arbiterControllerGameObject;
-    [SerializeField]
-    TemporaryCardsDeck tempCardsDeck;
-
-    public int numberOfPlayersInTheGame { get; set; }
-    [SerializeField]
-    private TurnsFollower turnsFollower;
+    //[SerializeField]
+    //private TurnsFollower turnsFollower;
     [SerializeField]
     private CardsDeck cardsDeckScriptFromThePlayer;
     [SerializeField]
@@ -103,15 +98,13 @@ public class PlayerController : NetworkBehaviour
 
 
     [SyncVar]
-    private bool isItMyTurnHook = false;
-    [SyncVar]
     private string playerName = "";
     [SyncVar]
     private bool isWhiteHat = false;
     [SyncVar]
     string hatColor = "";
     [SyncVar]
-    private int teamNumber = 0;
+    public int teamNumber = 0;
     [SyncVar]
     private Transform myPosition;
     private char regexTeam = '>';
@@ -128,31 +121,35 @@ public class PlayerController : NetworkBehaviour
     int playerOrder = 0;
     [SyncVar]
     int numberOfTurns = 1;
-    const int maxNumberOfTurns = 24;
+    const int maxNumberOfTurns = (int)Constants.MAX_NUMBER_OF_TURNS;
     [SyncVar]
-    int numberOfBallsFired = 0; // Lorsque 2 balles sont lancées (c'est-à-dire que les 2 équipes ont lancé chacun une balle) alors cela signifie qu'il y a eu un tour
+    public int numberOfBallsFired = 0; // Lorsque 2 balles sont lancées (c'est-à-dire que les 2 équipes ont lancé chacun une balle) alors cela signifie qu'il y a eu un tour
     [SyncVar]
-    string allCardsTitleInString = "";
-    [SyncVar]
-    string allMyCardsTitleString = "";
+    int numberOfBallsFiredByMyTeam = (int)Constants.NUMBER_BASE_OF_CARDS_PLAYED_BY_EACH_TEAM;
     [SyncVar]
     string allTeamMateCardsString = "";
     [SyncVar]
-    int id;
+    public int id;
     [SyncVar]
     bool allPlayersHaveChosenTheirCharacters = false;
     [SyncVar]
     bool playersCanStartToPlay = false;
+    [SyncVar]
+    int firstTeamWhichPlays = 1;
+    [SyncVar]
+    public bool isItMyTurn = false;
+    [SyncVar]
+    public bool isGameEnded = false;
+    [SyncVar]
+    bool hasPlayerBeenNotifiedForGameOver = false;
+    [SyncVar]
+    private int currentShooterTeamNumber = 1;
     #endregion
 
     IEnumerator WaitFewSecondsBeforeDistribuingCards()
     {
         yield return new WaitForSeconds(1.5f);
-
-        if(hasAuthority)
-            CmdCardDistributionFromPlayer();
-
-        turnsFollower.gameObject.SetActive(true);
+        //turnsFollower.gameObject.SetActive(true);
     }
 
     // Use this for initialization
@@ -178,6 +175,10 @@ public class PlayerController : NetworkBehaviour
 
             addPossibilityToChooseCharacterButtons();
             deactivateAllUselessCanvasForTheBeginning();
+
+            //Initialisation du deck de cartes du joueurs local
+            cardsDeckScriptFromThePlayer.loadCards();
+            myHealth = GetComponent<ComputerHealth>();
         }
 
     }
@@ -185,102 +186,127 @@ public class PlayerController : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (isServer)
+        try
         {
-            RpcGetNumberOfSpawnedVirus();
+            if (isServer)
+            {
+                RpcGetNumberOfSpawnedVirus();
+
+                if (!teamChoosed)
+                    updateTeamMembersText();
+                if (!allPlayersHaveChosenTheirCharacters)
+                    allPlayersHaveChosenTheirCharacters = haveAllPlayerChosenTheirCharacters();
+
+                if (numberOfBallsFired >= 2)
+                {
+                    RpcIncreaseNumberOfTurns();
+                    // Changer l'équipe qui doit jouer
+                    currentShooterTeamNumber = (currentShooterTeamNumber == 1) ? 2 : 1;
+                    RpcSetTeamWhichPlays(currentShooterTeamNumber);
+                }
+
+            }
+
+            if (!isLocalPlayer)
+                return;
+
+            numberOfTurnsText.text = "Tour : " + numberOfTurns + " / " + maxNumberOfTurns;
 
             if (!teamChoosed)
-                updateTeamMembersText();
-            if(!allPlayersHaveChosenTheirCharacters)
-                allPlayersHaveChosenTheirCharacters = haveAllPlayerChosenTheirCharacters();
+                setTeamsMembersTexts();
+
+            if (allPlayersHaveChosenTheirCharacters)
+            {
+                if (isItMyTurn)
+                {
+                    isItMyTurnText.text = "A votre tour de jouer";
+                    confirmCardButton.interactable = true;
+                }
+                else
+                {
+                    isItMyTurnText.text = "Au tour de l'adversaire !";
+                    confirmCardButton.interactable = false;
+                }
+
+                if(numberOfTurns > maxNumberOfTurns)
+                {
+                    //TODO
+                }
+
+                //Notifier tous les joueurs de la partie que l'on a perdu
+                // La deuxième condition permet de notifier les joueurs une unique fois
+                if (myHealth.getRemainingLife() <= 0 && !hasPlayerBeenNotifiedForGameOver)
+                {
+                    CmdSetGameOverForAllPlayers();
+                }
+
+                // Fin de la partie et on affiche le résultat : Gagné ou perdu
+                if(isGameEnded && !hasGameOverScreenBeenDisplayed)
+                {
+                    hasGameOverScreenBeenDisplayed = true;
+                    myHealth.gameOver();
+                }
+            }
+            else
+            {
+                isItMyTurnText.text = "En attente des autres joueurs...";
+            }
 
         }
+        catch(Exception e)
+        {
+            Debug.Log("Une exception a été lancée : " + e);
+        }
 
+    }
+
+    public void setIsItMyTurn(bool isItMyTurn)
+    {
+        if(isServer)
+            this.isItMyTurn = isItMyTurn;
 
         if (!isLocalPlayer)
             return;
 
-        //CmdSetAllTeamMateCardsTitleString();
-
-
-        //permet d'éviter d'avoir un nombre de tour égal à 0
-        if (numberOfBallsFired >= 1)
-            numberOfTurns = Mathf.CeilToInt(numberOfBallsFired / 2.0f);
-        numberOfTurnsText.text = "Tour : " + numberOfTurns + " / " + maxNumberOfTurns;
-
-        if (!teamChoosed)
-            setTeamsMembersTexts();
-
-        if(allPlayersHaveChosenTheirCharacters)
-        {
-            if (isItMyTurnHook)
-            {
-                isItMyTurnText.text = "A votre tour de jouer";
-                confirmCardButton.interactable = true;
-            }
-            else
-            {
-                isItMyTurnText.text = "Au tour de l'adversaire !";
-                confirmCardButton.interactable = false;
-            }
-        }
-        else
-        {
-            isItMyTurnText.text = "En attente des autres joueurs...";
-        }
-
+        this.isItMyTurn = isItMyTurn;
 
     }
 
-    public void onChangeIsItMyTurnHook()
+    public bool getIsItMyTurn()
     {
-
+        return isItMyTurn;
     }
 
-    public void setIsItMyTurnHook(bool isItMyTurnHook)
+    /*[Command]
+    public void CmdSetIsItMyTurnForAllMyTeam(int teamNumber, bool isItMyTurn)
     {
-        /*if (isLocalPlayer)
-            CmdSetIsItMyTurnHookForAllMyTeam(teamNumber, isItMyTurnHook);*/
-        if (!isServer)
-            return;
-        this.isItMyTurnHook = isItMyTurnHook;
-    }
+        RpcSetIsItMyTurnForAllMyTeam(teamNumber, isItMyTurn);
+    }*/
 
-    public bool getIsItMyTurnHook()
-    {
-        return isItMyTurnHook;
-    }
-
-    [Command]
-    public void CmdSetIsItMyTurnHookForAllMyTeam(int teamNumber, bool isItMyTurn)
-    {
-        RpcSetIsItMyTurnHookForAllMyTeam(teamNumber, isItMyTurn);
-    }
-
-    [ClientRpc]
-    public void RpcSetIsItMyTurnHookForAllMyTeam(int teamNumber, bool isItMyTurn)
-    {
+    /*[ClientRpc]
+    public void RpcSetIsItMyTurnForAllMyTeam(int teamNumber, bool isItMyTurn)
+    {*/
         /**
          * Les joueurs de l'équipe en paramètre peuvent jouer ou ne plus jouer en fonction du paramètre isItMyTurn
          * Et les joueurs de l'équipe adverse ont donc le choix inverse
          */
-        if(teamNumber == 1)
+        /*if(teamNumber == 1)
         {
             foreach (var pair in playersInTeam1Dico)
-                pair.Value.gameObject.GetComponent<PlayerController>().setIsItMyTurnHook(isItMyTurn);
+                pair.Value.gameObject.GetComponent<PlayerController>().setIsItMyTurn(isItMyTurn);
 
             foreach (var pair in playersInTeam2Dico)
-                pair.Value.gameObject.GetComponent<PlayerController>().setIsItMyTurnHook(!isItMyTurn);
+                pair.Value.gameObject.GetComponent<PlayerController>().setIsItMyTurn(!isItMyTurn);
         }
         else if(teamNumber == 2)
         {
             foreach (var pair in playersInTeam2Dico)
-                pair.Value.gameObject.GetComponent<PlayerController>().setIsItMyTurnHook(isItMyTurn);
+                pair.Value.gameObject.GetComponent<PlayerController>().setIsItMyTurn(isItMyTurn);
 
             foreach (var pair in playersInTeam1Dico)
-                pair.Value.gameObject.GetComponent<PlayerController>().setIsItMyTurnHook(!isItMyTurn);
+                pair.Value.gameObject.GetComponent<PlayerController>().setIsItMyTurn(!isItMyTurn);
         }
-    }
+    }*/
 
     void addPossibilityToChooseTeamButtons()
     {
@@ -299,8 +325,7 @@ public class PlayerController : NetworkBehaviour
                 case "teamChoosedButton":
                     teamChoosedButton = btn;
                     teamChoosedButton.onClick.AddListener(delegate { CmdTeamChoosed(); });
-                    if(!testMode)
-                        teamChoosedButton.interactable = false;
+                    teamChoosedButton.interactable = false;
                     break;
 
             }
@@ -317,27 +342,17 @@ public class PlayerController : NetworkBehaviour
         isItMyTurnCanvas.gameObject.SetActive(false);
     }
 
-    public void addCardToMyDeck(Card card)
-    {
-        if(isLocalPlayer)
-        {
-            if (card != null)
-                tempCardsDeck.addCard(card);
-        }
-
-    }
-
-
 
     void getAllOfThePlayersInAList()
     {
-
+        // Vérifie si on n'a bien récupérer tous les joueurs en comparant le nombre de joueurs du lobby et la liste où on a récupéré les joueurs
         if (playersInGame.Count != numberOfPlayersInTheGame)
             playersInGame = new List<GameObject>(GameObject.FindGameObjectsWithTag("player"));
 
-        arbiter = arbiterControllerGameObject.GetComponent<ArbiterController>();
-        arbiter.numberOfPlayersInTheGame = Prototype.NetworkLobby.LobbyPlayerList.numberOfPlayerInTheRoom;
-        arbiter.distributeCards(playersInGame);
+        //arbiter = arbiterControllerGameObject.GetComponent<ArbiterController>();
+        //TODO nombre de joueurs à récupérer quelques part
+        numberOfPlayersInLobby = Prototype.NetworkLobby.LobbyPlayerList.numberOfPlayerInTheRoom;
+        //arbiter.distributeCards(playersInGame);
 
         areAllPlayersHere = true;
     }
@@ -363,14 +378,14 @@ public class PlayerController : NetworkBehaviour
         //L'attribut card n'est pas passé en paramètre car cela engendre des problèmes lorsque que l'on tente d'instancier des balles sur les clients
         //De plus, on ne peut passer des objets (ex: Card) en paramètre pour les fonctions Command (s'éxécutant sur les clients)
         CmdFire(cardPlayedInfos);
+        CmdIncreaseNumberOfBallsFired();
     }
 
 
     [Command]
     public void CmdFire(string[] cardPlayedInfos)
     {
-
-        bool isAttakCard = (cardPlayedInfos[3].ToUpper() == "TRUE") ? true : false;
+        bool isAttakCard = (cardPlayedInfos[3].ToUpper() == "TRUE");
         ComputerLayer touchedLayer = ComputerLayer.HARDWARE;
         string touchedLayerString = cardPlayedInfos[4].ToUpper();
         if (touchedLayerString == "SOFTWARE")
@@ -395,8 +410,6 @@ public class PlayerController : NetworkBehaviour
             var virusEffects = virus.GetComponent<VirusController>();
             virusEffects.targetLayer1 = cardPlayedByThePlayer.touchedLayer;
             virusEffects.damageLayer1 = cardPlayedByThePlayer.getDamage();
-            virusEffects.playerWhoFiredTheVirus = this;
-            virusEffects.numberOfTeamWhoFiredTheVirus = this.teamNumber;
 
             //Changer la couleur de la balle pour qu'elle soit de la même couleur que la carte
             Renderer[] rends = virus.GetComponentsInChildren<Renderer>();
@@ -414,11 +427,10 @@ public class PlayerController : NetworkBehaviour
         // Si la carte n'est pas une carte d'attaque alors c'est une carte qui nous rajoute des points
         else if (!cardPlayedByThePlayer.isAttackCard)
         {
-            GetComponent<ComputerHealth>().setHealth(cardPlayedByThePlayer.touchedLayer, cardPlayedByThePlayer.getDamage(), false);
+            myHealth.setHealth(cardPlayedByThePlayer.touchedLayer, cardPlayedByThePlayer.getDamage(), false);
         }
-
-        RpcIncreaseNumberOfTurns();
     }
+
 
     [Command]
     public void CmdTeamChoosed()
@@ -438,6 +450,8 @@ public class PlayerController : NetworkBehaviour
         numberOfTurnsCanvas.gameObject.SetActive(false);
         isItMyTurnCanvas.gameObject.SetActive(false);
         teamChoosed = true;
+        if (teamNumber == firstTeamWhichPlays)
+            isItMyTurn = true;
 
         // Possibilité de choisir un joueur après avoir choisit son équipe
         Button[] playerButtons = GetComponentsInChildren<Button>();
@@ -624,19 +638,10 @@ public class PlayerController : NetworkBehaviour
         {
             showMyCardsCanvas.gameObject.SetActive(true);
             mainCanvas.gameObject.SetActive(false);
-        }
-        else
-        {
-            //TODO gérer l'affichage des cartes du coéquipier
+            cardsDeckScriptFromThePlayer.showCardInformations();
         }
 
     }
-
-    public string getAllMyCardsTitleString()
-    {
-        return allMyCardsTitleString;
-    }
-
 
     #endregion
 
@@ -772,13 +777,10 @@ public class PlayerController : NetworkBehaviour
             }
         }
 
-        if(!testMode)
-        {
-            if (numberOfPeopleInTeam1 >= minNumberOfPlayersPerTeam && numberOfPeopleInTeam1 == numberOfPeopleInTeam2)
-                teamChoosedButton.interactable = true;
-            else
-                teamChoosedButton.interactable = false;
-        }
+        if (numberOfPeopleInTeam1 > 0 && numberOfPeopleInTeam2 > 0)
+            teamChoosedButton.interactable = true;
+        else
+            teamChoosedButton.interactable = false;
 
 
         team1MembersText.text = playersInTeam1;
@@ -797,12 +799,12 @@ public class PlayerController : NetworkBehaviour
             }
         }
 
-        return allPlayersHaveATeam;
-    }
+        /*if(allPlayersHaveATeam)
+        {
+            RpcSetTeamWhichPlays(currentShooterTeamNumber);
+        }*/
 
-    public void allPlayersCanStartToPlay()
-    {
-        // TODO
+        return allPlayersHaveATeam;
     }
 
     #endregion
@@ -827,9 +829,6 @@ public class PlayerController : NetworkBehaviour
     }
     #endregion
 
-
-
-
     #region Méthodes liées aux tours
 
     [Command]
@@ -849,7 +848,32 @@ public class PlayerController : NetworkBehaviour
             if (pair.Value.name == "Player(Clone)")
             {
                 p = pair.Value.gameObject.GetComponent<PlayerController>();
-                p.setNumberOTurns();
+                p.setNumberOfTurns();
+
+            }
+        }
+
+    }
+
+    [Command]
+    public void CmdIncreaseNumberOfBallsFired()
+    {
+        RpcIncreaseNumberOfBallsFired();
+    }
+
+    [ClientRpc]
+    public void RpcIncreaseNumberOfBallsFired()
+    {
+
+        Dictionary<NetworkInstanceId, NetworkIdentity> playersDico = NetworkServer.objects;
+        PlayerController p;
+        foreach (var pair in playersDico)
+        {
+            if (pair.Value.name == "Player(Clone)")
+            {
+                p = pair.Value.gameObject.GetComponent<PlayerController>();
+                p.setNumberOfBallsFired();
+
             }
         }
 
@@ -861,10 +885,86 @@ public class PlayerController : NetworkBehaviour
     }
 
     //Le nombre de tour n'augmente que de 1, donc pas besoin de passer d'arguments en paramètre
-    public void setNumberOTurns()
+    public void setNumberOfTurns()
+    {
+        numberOfTurns++;
+    }
+
+    public void setNumberOfBallsFired()
     {
         numberOfBallsFired++;
     }
+
+    [Command]
+    public void CmdSetNumberOfBallsFiredByMyTeam(Constants action, int teamWhoFiredTheBalls)
+    {
+        RpcSetNumberOfBallsFiredByMyTeam(action, teamWhoFiredTheBalls);
+    }
+
+
+    [ClientRpc]
+    public void RpcSetNumberOfBallsFiredByMyTeam(Constants action, int teamWhoFiredTheBalls)
+    {
+        Dictionary<NetworkInstanceId, NetworkIdentity> playersDico = NetworkServer.objects;
+        PlayerController p;
+        foreach (var pair in playersDico)
+        {
+            if (pair.Value.name == "Player(Clone)")
+            {
+                p = pair.Value.gameObject.GetComponent<PlayerController>();
+                p.setNumberOfBallsFiredByMyTeam(action, teamWhoFiredTheBalls);
+            }
+        }
+    }
+
+    public void setNumberOfBallsFiredByMyTeam(Constants action, int team)
+    {
+        if(teamNumber == team)
+        {
+            if(action == Constants.ADD)
+            {
+                numberOfBallsFiredByMyTeam++;
+            }
+            else if(action == Constants.RESET)
+            {
+                numberOfBallsFiredByMyTeam = (int)Constants.NUMBER_BASE_OF_CARDS_PLAYED_BY_EACH_TEAM;
+            }
+        }
+        else
+        {
+            numberOfBallsFiredByMyTeam = (int)Constants.NUMBER_BASE_OF_CARDS_PLAYED_BY_EACH_TEAM;
+        }
+    }
+
+
+    public int getNumberOfBallsFiredByMyTeam()
+    {
+        return numberOfBallsFiredByMyTeam;
+    }
+
+    [Command]
+    public void CmdSetTeamWhichPlays(int number)
+    {
+        RpcSetTeamWhichPlays(number);
+    }
+
+
+    [ClientRpc]
+    public void RpcSetTeamWhichPlays(int number)
+    {
+        Dictionary<NetworkInstanceId, NetworkIdentity> playersDico = NetworkServer.objects;
+        PlayerController p;
+        foreach (var pair in playersDico)
+        {
+            if (pair.Value.name == "Player(Clone)")
+            {
+                p = pair.Value.gameObject.GetComponent<PlayerController>();
+                p.setIsItMyTurn(p.getTeamNumber() == number);
+            }
+        }
+        numberOfBallsFired = 0;
+    }
+
     #endregion
 
 
@@ -881,6 +981,37 @@ public class PlayerController : NetworkBehaviour
                 numberOfSpawnedVirus++;
             }
         }
-        Debug.Log("Nombre de virus spawn : " + numberOfSpawnedVirus);
+    }
+
+    [Command]
+    public void CmdSetGameOverForAllPlayers()
+    {
+        RpcSetGameOverForAllPlayers();
+    }
+
+    [ClientRpc]
+    public void RpcSetGameOverForAllPlayers()
+    {
+        Dictionary<NetworkInstanceId, NetworkIdentity> playersDico = NetworkServer.objects;
+        PlayerController player;
+        foreach (var pair in playersDico)
+        {
+            if (pair.Value.name == "Player(Clone)")
+            {
+                player = pair.Value.gameObject.GetComponent<PlayerController>();
+                player.setIsGameEnded(true);
+                player.setHasPlayerBeenNotifiedForGameOver(true);
+            }
+        }
+    }
+
+    public void setIsGameEnded(bool end)
+    {
+        this.isGameEnded = end;
+    }
+
+    public void setHasPlayerBeenNotifiedForGameOver(bool over)
+    {
+        this.hasPlayerBeenNotifiedForGameOver = over;
     }
 }

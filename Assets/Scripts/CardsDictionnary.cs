@@ -4,9 +4,11 @@ using UnityEngine;
 
 public class CardsDictionnary {
 
-    public static Dictionary<string, Card> getCardsDictionnary()
-    {
-        Dictionary<string, Card> cardsDictionary = new Dictionary<string, Card>();
+    private static Dictionary<string, Card> cardsDictionary = new Dictionary<string, Card>();
+    private static List<string> dictionaryKeys = new List<string>();
+
+    public static Dictionary<string, Card> loadCardsDictionnary()
+    {        
 
         //Initialisation de toutes les cartes du jeu
         Card trojan = new Card("TROJAN",
@@ -38,24 +40,33 @@ public class CardsDictionnary {
         cardsDictionary.Add("scan", scan);
         cardsDictionary.Add("vpn", vpn);
 
-
-
+        loadDictionaryKeys();
 
         return cardsDictionary;
     }
 
-    public static Dictionary<int, Card> getCardsDictionnaryForDistribution()
+    public static void loadDictionaryKeys()
     {
-        Dictionary<int, Card> cardsDictionary = new Dictionary<int, Card>();
-
-        int i = 1;
-
-        foreach (KeyValuePair<string, Card> card in getCardsDictionnary())
+        foreach (KeyValuePair<string, Card> card in cardsDictionary)
         {
-            cardsDictionary.Add(i, card.Value);
+            dictionaryKeys.Add(card.Key);
         }
+    }
 
-        return cardsDictionary;
+    public static Card getRandomCard()
+    {
+        if (dictionaryKeys.Count <= 1)
+            loadDictionaryKeys();
+
+        Card card = null;
+        int rdn = 0;
+
+        if(dictionaryKeys.Count > 0)
+            rdn = Random.Range(0, dictionaryKeys.Count);
+        string key = dictionaryKeys[rdn];
+        dictionaryKeys.Remove(key);
+        card = cardsDictionary[key];
+        return card;
     }
 
 

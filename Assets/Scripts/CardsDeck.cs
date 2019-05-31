@@ -6,17 +6,12 @@ using UnityEngine.UI;
 
 public class CardsDeck : MonoBehaviour {
 
-    [SerializeField]
-    private TemporaryCardsDeck tempDeck;
-    [SerializeField]
-    private CardPlayed cardPlayed;
-
     List<Card> cardsDeck = new List<Card>();
     Card choosenCard;
     int numberOfCards;
     int indexOfCard = 0;
 
-    PlayerController playerController;
+    //PlayerController playerController;
 
     [SerializeField]
     private Text indexOfTheCurrentCardText;
@@ -29,14 +24,18 @@ public class CardsDeck : MonoBehaviour {
     [SerializeField]
     private Image backgroundColor;
 
-    public void add(Card card)
+    public void loadCards()
     {
-        cardsDeck.Add(card);
-    }
+        CardsDictionnary.loadCardsDictionnary();
+        this.numberOfCards = (int)Constants.NUMBER_CARDS_PER_PLAYER;
 
-    public void remove(Card card)
-    {
-        cardsDeck.Remove(card);
+        for(int i = 0; i < numberOfCards; i++)
+        {
+            Card card = CardsDictionnary.getRandomCard();
+            if(card != null)
+                cardsDeck.Add(card);
+        }
+        //showCardInformations();
     }
 
     public int getNbOfCards()
@@ -44,41 +43,11 @@ public class CardsDeck : MonoBehaviour {
         return cardsDeck.Count;
     }
 
-    IEnumerator WaitBeforeLoadingMyCardsDeck()
-    {
-        yield return new WaitForSeconds(1.0f);
-        cardsDeck = tempDeck.getCards();
-        indexOfCard = 0;
-        numberOfCards = cardsDeck.Count;
-        showCardInformations();
-
-    }
-
     public Card getCard(int i)
     {
         return cardsDeck[i];
     }
 
-	// Use this for initialization
-	void Start ()
-    {
-        StartCoroutine(WaitBeforeLoadingMyCardsDeck());
-    }
-
-    
-
-    public void getDeckOfCardsFromThePlayerController(List<Card> cards)
-    {
-        //cardsDeck = playerController.getMyCardsDeck();
-        //cardsDeck = cards;
-        indexOfCard = 0;
-        numberOfCards = cardsDeck.Count;
-        showCardInformations();
-    }
-	
-	// Update is called once per frame
-	void Update () {
-	}
 
     public void onClickPreviousCard()
     {
@@ -93,17 +62,20 @@ public class CardsDeck : MonoBehaviour {
     public void onClickConfirmCard()
     {
         Card card = cardsDeck[indexOfCard];
-        /*cardsDeck.RemoveAt(indexOfCard);
-        numberOfCards--;*/
+        // Retrait de la carte qui va être jouée
+        cardsDeck.Remove(card);
+        // Ajout d'une nouvelle carte dans le deck
+        cardsDeck.Add(CardsDictionnary.getRandomCard());
+        //Affichage des nouvelles informations après le retrait et l'ajout d'une nouvelle carte
         showCardInformations();
-        cardPlayed.currentCardPlayed = card;
+        // Appel à la méthode fire afin de lancer la carte
         GetComponentInParent<PlayerController>().shootFromCardsDeckClass(card.getCardinfosInAStringArray());
     }
 
-    public void passMyTurn()
+    /*public void passMyTurn()
     {
         GetComponentInParent<PlayerController>().setIsItMyTurnHook(false);
-    }
+    }*/
 
     public void onClickNextCard()
     {
@@ -114,7 +86,7 @@ public class CardsDeck : MonoBehaviour {
         }
     }
 
-    void showCardInformations()
+    public void showCardInformations()
     {
         indexOfTheCurrentCardText.text = (indexOfCard + 1).ToString() + " / " + numberOfCards.ToString();
         Card card = cardsDeck[indexOfCard];
@@ -122,30 +94,5 @@ public class CardsDeck : MonoBehaviour {
         cardDefiniton.text = card.definition;
         cardAction.text = card.action;
         backgroundColor.color = card.getCardColor();
-    }
-
-    private void getRandomCards()
-    {
-        Card trojan = new Card("Trojan",
-                                       "Le cheval de Troie est un logiciel en apparence légitime, mais qui contient une fonctionnalité malveillante.C’est un virus statique.",
-                                       "SOFTWARE -2", true, ComputerLayer.SOFTWARE, 2, new Color(255, 0, 0));
-
-
-
-        Card virusCrypto = new Card("VIRUS\nCRYPTOLOCKER",
-                               " Alors que vous allumez votre ordinateur pour consulter vos mails, un message apparait. Il faut payer une rançon pour récupérer vos données.",
-                               "OS -2", true, ComputerLayer.OS, 2, new Color(255, 0, 0));
-
-
-
-        Card ddos = new Card("DDOS", "Une attaque DDoS vise à rendre un serveur indisponible en surchargeant la bande passante du serveur ou en accaparant ses ressources jusqu'à épuisement.",
-                               "HARDWARE -4", true, ComputerLayer.HARDWARE, 4, new Color(255, 0, 0));
-
-        add(trojan);
-        add(virusCrypto);
-        add(ddos);
-        indexOfCard = 0;
-        numberOfCards = cardsDeck.Count;
-        showCardInformations();
     }
 }
