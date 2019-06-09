@@ -155,6 +155,21 @@ public class ComputerHealth : NetworkBehaviour {
         }
     }
 
+    public void gameOver(bool gameWon)
+    {
+        if (!isLocalPlayer)
+            return;
+
+        if (!gameWon)
+        {
+            showLooseScreen();
+        }
+        else
+        {
+            showWinScreen();
+        }
+    }
+
     public void showLooseScreen()
     {
         gameOverCanvas.gameObject.SetActive(true);
@@ -175,6 +190,11 @@ public class ComputerHealth : NetworkBehaviour {
     public int getRemainingLife()
     {
         return remainingLife;
+    }
+
+    public void setRemainingLife(int life)
+    {
+        remainingLife = life;
     }
 
 }

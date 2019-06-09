@@ -88,6 +88,8 @@ public class PlayerController : NetworkBehaviour
     private Canvas chooseTeamCanvas;
     [SerializeField]
     private Canvas numberOfTurnsCanvas;
+    [SerializeField]
+    private GameObject computerObject;
     #endregion
 
     #region Boutons auxquels on doit rajouter des fonctionnalités
@@ -126,8 +128,8 @@ public class PlayerController : NetworkBehaviour
     const int maxNumberOfTurns = (int)Constants.MAX_NUMBER_OF_TURNS;
     [SyncVar]
     public int numberOfBallsFired = 0; // Lorsque 2 balles sont lancées (c'est-à-dire que les 2 équipes ont lancé chacun une balle) alors cela signifie qu'il y a eu un tour
-    [SyncVar]
-    int numberOfBallsFiredByMyTeam = (int)Constants.NUMBER_BASE_OF_CARDS_PLAYED_BY_EACH_TEAM;
+    /*[SyncVar]
+    int numberOfBallsFiredByMyTeam = (int)Constants.NUMBER_BASE_OF_CARDS_PLAYED_BY_EACH_TEAM;*/
     [SyncVar]
     string allTeamMateCardsString = "";
     [SyncVar]
@@ -200,11 +202,13 @@ public class PlayerController : NetworkBehaviour
 
                 if (numberOfBallsFired >= 2)
                 {
-                    RpcIncreaseNumberOfTurns();
+                    numberOfTurns++;
+                    RpcSetNumberOfTurns(numberOfTurns);
                     // Changer l'équipe qui doit jouer
                     currentShooterTeamNumber = (currentShooterTeamNumber == 1) ? 2 : 1;
                     RpcSetTeamWhichPlays(currentShooterTeamNumber);
-                }
+                    numberOfBallsFired = 0;
+                }               
 
             }
 
@@ -215,6 +219,18 @@ public class PlayerController : NetworkBehaviour
 
             if (!teamChoosed)
                 setTeamsMembersTexts();
+            else
+            {
+                if(teamNumber == 1)
+                {
+                    computerObject.transform.position = positionCenterTeam1.position;
+                }
+                else
+                {
+                    computerObject.transform.position = positionCenterTeam2.position;
+                }
+                computerObject.transform.rotation = new Quaternion(0,90,0,1);
+            }
 
             if (allPlayersHaveChosenTheirCharacters)
             {
@@ -229,9 +245,9 @@ public class PlayerController : NetworkBehaviour
                     confirmCardButton.interactable = false;
                 }
 
-                if(numberOfTurns > maxNumberOfTurns)
+                if (numberOfTurns > maxNumberOfTurns && !hasGameOverScreenBeenDisplayed)
                 {
-                    //TODO
+                    CmdSetEndGameForAllPlayers();
                 }
 
                 //Notifier tous les joueurs de la partie que l'on a perdu
@@ -381,6 +397,7 @@ public class PlayerController : NetworkBehaviour
     {        
         if (!isLocalPlayer)
             return;
+        
 
         //L'attribut card n'est pas passé en paramètre car cela engendre des problèmes lorsque que l'on tente d'instancier des balles sur les clients
         //De plus, on ne peut passer des objets (ex: Card) en paramètre pour les fonctions Command (s'éxécutant sur les clients)
@@ -436,6 +453,7 @@ public class PlayerController : NetworkBehaviour
         {
             myHealth.setHealth(cardPlayedByThePlayer.touchedLayer, cardPlayedByThePlayer.getDamage(), false);
         }
+        //numberOfBallsFired++;
     }
     
 
@@ -628,10 +646,6 @@ public class PlayerController : NetworkBehaviour
         {
             showMyCardsCanvas.gameObject.SetActive(false);
             mainCanvas.gameObject.SetActive(true);
-        }
-        else
-        {
-            //TODO gérer la disparition de l'écran des cartes du coéquipier
         }
         
     }
@@ -838,14 +852,14 @@ public class PlayerController : NetworkBehaviour
 
     #region Méthodes liées aux tours
 
-    [Command]
-    public void CmdIncreaseNumberOfTurns()
+    /*[Command]
+    public void CmdSetNumberOfTurns()
     {
-        RpcIncreaseNumberOfTurns();
-    }
+        RpcSetNumberOfTurns();
+    }*/
 
     [ClientRpc]
-    public void RpcIncreaseNumberOfTurns()
+    public void RpcSetNumberOfTurns(int numberOfTurns)
     {
 
         Dictionary<NetworkInstanceId, NetworkIdentity> playersDico = NetworkServer.objects;
@@ -855,16 +869,19 @@ public class PlayerController : NetworkBehaviour
             if (pair.Value.name == "Player(Clone)")
             {
                 p = pair.Value.gameObject.GetComponent<PlayerController>();
-                p.setNumberOfTurns();
+                p.setNumberOfTurns(numberOfTurns);
+                p.setNumberOfBallsFired(0);
 
             }
         }
+        numberOfBallsFired = 0;
         
     }
 
     [Command]
     public void CmdIncreaseNumberOfBallsFired()
     {
+        //numberOfBallsFired++;
         RpcIncreaseNumberOfBallsFired();
     }
 
@@ -890,19 +907,21 @@ public class PlayerController : NetworkBehaviour
     {
         return numberOfTurns;
     }
-
-    //Le nombre de tour n'augmente que de 1, donc pas besoin de passer d'arguments en paramètre
-    public void setNumberOfTurns()
+    
+    public void setNumberOfTurns(int numberOfTurns)
     {
-        numberOfTurns++;
+        this.numberOfTurns = numberOfTurns;
     }
 
-    public void setNumberOfBallsFired()
+    public void setNumberOfBallsFired(int number = 1)
     {
-        numberOfBallsFired++;
+        if (number == 0)
+            numberOfBallsFired = 0;
+        else
+            numberOfBallsFired++;
     }
 
-    [Command]
+    /*[Command]
     public void CmdSetNumberOfBallsFiredByMyTeam(Constants action, int teamWhoFiredTheBalls)
     {
         RpcSetNumberOfBallsFiredByMyTeam(action, teamWhoFiredTheBalls);
@@ -947,7 +966,7 @@ public class PlayerController : NetworkBehaviour
     public int getNumberOfBallsFiredByMyTeam()
     {
         return numberOfBallsFiredByMyTeam;
-    }
+    }*/
 
     [Command]
     public void CmdSetTeamWhichPlays(int number)
@@ -1009,6 +1028,44 @@ public class PlayerController : NetworkBehaviour
                 player.setIsGameEnded(true);
                 player.setHasPlayerBeenNotifiedForGameOver(true);
             }            
+        }
+    }
+
+    [Command]
+    public void CmdSetEndGameForAllPlayers()
+    {
+        RpcSetEndGameForAllPlayers();
+    }
+
+    [ClientRpc]
+    public void RpcSetEndGameForAllPlayers()
+    {
+        int lifeMin = int.MaxValue;
+        // Chercher le nombre de vie minimum
+        Dictionary<NetworkInstanceId, NetworkIdentity> playersDico = NetworkServer.objects;
+        PlayerController player;
+        foreach (var pair in playersDico)
+        {
+            if (pair.Value.name == "Player(Clone)")
+            {
+                ComputerHealth health = pair.Value.gameObject.GetComponent<PlayerController>().GetComponent<ComputerHealth>();
+                if (health.getRemainingLife() < lifeMin)
+                    lifeMin = health.getRemainingLife();
+            }
+        }
+
+        //Pour chaque joueur qui a le moins de vie, on met sa vie à 0 puis on appelle la méthode gameOver pour tous les joueurs
+        foreach (var pair in playersDico)
+        {
+            if (pair.Value.name == "Player(Clone)")
+            {
+                //PlayerController player = pair.Value.gameObject.GetComponent<PlayerController>();
+                ComputerHealth health = pair.Value.gameObject.GetComponent<PlayerController>().GetComponent<ComputerHealth>();
+                if (health.getRemainingLife() == lifeMin)
+                {
+                    health.setRemainingLife(0);
+                }
+            }
         }
     }
 
