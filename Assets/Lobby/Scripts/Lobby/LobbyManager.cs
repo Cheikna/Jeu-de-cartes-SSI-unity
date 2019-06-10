@@ -65,6 +65,7 @@ namespace Prototype.NetworkLobby
             DontDestroyOnLoad(gameObject);
 
             SetServerInfo("HORS-LIGNE", "Aucun");
+            ChangeTo(mainMenuPanel);
         }
 
         public override void OnLobbyClientSceneChanged(NetworkConnection conn)
@@ -178,11 +179,13 @@ namespace Prototype.NetworkLobby
 
         public void SimpleBackClbk()
         {
+            Debug.Log("SimpleBackClbk");
             ChangeTo(mainMenuPanel);
         }
                  
         public void StopHostClbk()
         {
+            Debug.Log("StopHostClbk");
             if (_isMatchmaking)
             {
 				matchMaker.DestroyMatch((NetworkID)_currentMatchID, 0, OnDestroyMatch);
@@ -199,6 +202,7 @@ namespace Prototype.NetworkLobby
 
         public void StopClientClbk()
         {
+            Debug.Log("StopClientClbk");
             StopClient();
 
             if (_isMatchmaking)
@@ -238,7 +242,7 @@ namespace Prototype.NetworkLobby
 
             ChangeTo(lobbyPanel);
             backDelegate = StopHostClbk;
-            SetServerInfo("HEBERGEMENT", networkAddress);
+            SetServerInfo("Hébergeur", networkAddress);
         }
 
 		public override void OnMatchCreate(bool success, string extendedInfo, MatchInfo matchInfo)
@@ -250,7 +254,8 @@ namespace Prototype.NetworkLobby
 		public override void OnDestroyMatch(bool success, string extendedInfo)
 		{
 			base.OnDestroyMatch(success, extendedInfo);
-			if (_disconnectServer)
+            Debug.Log("OnDestroyMatch");
+            if (_disconnectServer)
             {
                 StopMatchMaker();
                 StopHost();
@@ -311,6 +316,7 @@ namespace Prototype.NetworkLobby
 
         public override void OnLobbyServerDisconnect(NetworkConnection conn)
         {
+            Debug.Log("OnLobbyServerDisconnect");
             for (int i = 0; i < lobbySlots.Length; ++i)
             {
                 LobbyPlayer p = lobbySlots[i] as LobbyPlayer;
@@ -414,22 +420,13 @@ namespace Prototype.NetworkLobby
 
         public override void OnClientError(NetworkConnection conn, int errorCode)
         {
+            Debug.Log("OnClientError");
             ChangeTo(mainMenuPanel);
             infoPanel.Display("Client error : " + (errorCode == 6 ? "timeout" : errorCode.ToString()), "Close", null);
         }
 
-        public void resetLobbyManager()
+        public void backToLobby()
         {
-            /*s_Singleton = this;
-            _lobbyHooks = GetComponent<Prototype.NetworkLobby.LobbyHook>();
-            currentPanel = mainMenuPanel;
-
-            backButton.gameObject.SetActive(false);
-            GetComponent<Canvas>().enabled = true;
-
-            DontDestroyOnLoad(gameObject);
-
-            SetServerInfo("HORS-LIGNE", "Aucun");*/
             ChangeTo(mainMenuPanel);
         }
 

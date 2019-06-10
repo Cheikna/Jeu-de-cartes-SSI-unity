@@ -402,7 +402,7 @@ public class PlayerController : NetworkBehaviour
         //L'attribut card n'est pas passé en paramètre car cela engendre des problèmes lorsque que l'on tente d'instancier des balles sur les clients
         //De plus, on ne peut passer des objets (ex: Card) en paramètre pour les fonctions Command (s'éxécutant sur les clients)
         CmdFire(cardPlayedInfos);
-        CmdIncreaseNumberOfBallsFired();        
+        //CmdIncreaseNumberOfBallsFired();        
     }
 
 
@@ -427,16 +427,18 @@ public class PlayerController : NetworkBehaviour
                                               new Color(int.Parse(cardPlayedInfos[6]), int.Parse(cardPlayedInfos[7]), int.Parse(cardPlayedInfos[8]))                                              
                                               );
 
+        
 
         if (cardPlayedByThePlayer.isAttackCard)
         {
             var virus = (GameObject)Instantiate(virusPrefab, virusSpawn.position, virusSpawn.rotation);
+            Renderer[] rends = virus.GetComponentsInChildren<Renderer>();
+
             var virusEffects = virus.GetComponent<VirusController>();
             virusEffects.targetLayer1 = cardPlayedByThePlayer.touchedLayer;
             virusEffects.damageLayer1 = cardPlayedByThePlayer.getDamage();
 
-            //Changer la couleur de la balle pour qu'elle soit de la même couleur que la carte
-            Renderer[] rends = virus.GetComponentsInChildren<Renderer>();
+            //Changer la couleur de la balle pour qu'elle soit de la même couleur que la carte            
             foreach (Renderer r in rends)
                 r.material.color = cardPlayedByThePlayer.getCardColor();
             
@@ -451,11 +453,34 @@ public class PlayerController : NetworkBehaviour
         // Si la carte n'est pas une carte d'attaque alors c'est une carte qui nous rajoute des points
         else if (!cardPlayedByThePlayer.isAttackCard)
         {
-            myHealth.setHealth(cardPlayedByThePlayer.touchedLayer, cardPlayedByThePlayer.getDamage(), false);
+            //myHealth.setHealth(cardPlayedByThePlayer.touchedLayer, cardPlayedByThePlayer.getDamage(), false);
+            RpcSetHealthForAllMyteam(cardPlayedByThePlayer, teamNumber);
         }
-        //numberOfBallsFired++;
+
+        RpcIncreaseNumberOfBallsFired();
     }
     
+    [ClientRpc]
+    public void RpcSetHealthForAllMyteam(Card cardPlayed, int teamNumber)
+    {
+        Dictionary<NetworkInstanceId, NetworkIdentity> playersDico = NetworkServer.objects;
+        ComputerHealth health;
+        PlayerController player;
+        foreach (var pair in playersDico)
+        {
+            if (pair.Value.name == "Player(Clone)")
+            {
+                player = pair.Value.gameObject.GetComponent<PlayerController>();
+                if(player.getTeamNumber() == teamNumber)
+                {
+                    health = player.GetComponent<ComputerHealth>();
+                    health.setHealth(cardPlayed.touchedLayer, cardPlayed.getDamage(), false);
+                }
+                
+
+            }
+        }
+    }
 
     [Command]
     public void CmdTeamChoosed()
@@ -852,12 +877,6 @@ public class PlayerController : NetworkBehaviour
 
     #region Méthodes liées aux tours
 
-    /*[Command]
-    public void CmdSetNumberOfTurns()
-    {
-        RpcSetNumberOfTurns();
-    }*/
-
     [ClientRpc]
     public void RpcSetNumberOfTurns(int numberOfTurns)
     {
@@ -889,6 +908,7 @@ public class PlayerController : NetworkBehaviour
     public void RpcIncreaseNumberOfBallsFired()
     {
 
+        Debug.Log("====> balls : " + numberOfBallsFired);
         Dictionary<NetworkInstanceId, NetworkIdentity> playersDico = NetworkServer.objects;
         PlayerController p;
         foreach (var pair in playersDico)
@@ -921,52 +941,6 @@ public class PlayerController : NetworkBehaviour
             numberOfBallsFired++;
     }
 
-    /*[Command]
-    public void CmdSetNumberOfBallsFiredByMyTeam(Constants action, int teamWhoFiredTheBalls)
-    {
-        RpcSetNumberOfBallsFiredByMyTeam(action, teamWhoFiredTheBalls);
-    }
-
-
-    [ClientRpc]
-    public void RpcSetNumberOfBallsFiredByMyTeam(Constants action, int teamWhoFiredTheBalls)
-    {
-        Dictionary<NetworkInstanceId, NetworkIdentity> playersDico = NetworkServer.objects;
-        PlayerController p;
-        foreach (var pair in playersDico)
-        {
-            if (pair.Value.name == "Player(Clone)")
-            {
-                p = pair.Value.gameObject.GetComponent<PlayerController>();
-                p.setNumberOfBallsFiredByMyTeam(action, teamWhoFiredTheBalls);
-            }
-        }
-    }
-
-    public void setNumberOfBallsFiredByMyTeam(Constants action, int team)
-    {
-        if(teamNumber == team)
-        {
-            if(action == Constants.ADD)
-            {
-                numberOfBallsFiredByMyTeam++;
-            }
-            else if(action == Constants.RESET)
-            {
-                numberOfBallsFiredByMyTeam = (int)Constants.NUMBER_BASE_OF_CARDS_PLAYED_BY_EACH_TEAM;
-            }
-        }
-        else
-        {
-            numberOfBallsFiredByMyTeam = (int)Constants.NUMBER_BASE_OF_CARDS_PLAYED_BY_EACH_TEAM;
-        }
-    }
-
-
-    public int getNumberOfBallsFiredByMyTeam()
-    {
-        return numberOfBallsFiredByMyTeam;
-    }*/
 
     [Command]
     public void CmdSetTeamWhichPlays(int number)

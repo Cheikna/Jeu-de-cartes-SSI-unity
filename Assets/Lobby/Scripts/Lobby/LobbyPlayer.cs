@@ -325,6 +325,7 @@ namespace Prototype.NetworkLobby
         //Cleanup thing when get destroy (which happen when client kick or disconnect)
         public void OnDestroy()
         {
+            Debug.Log("OnDestroy");
             LobbyPlayerList._instance.RemovePlayer(this);
             if (LobbyManager.s_Singleton != null) LobbyManager.s_Singleton.OnPlayersNumberModified(-1);
 
