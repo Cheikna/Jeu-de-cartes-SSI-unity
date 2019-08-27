@@ -904,11 +904,15 @@ PlayerSettings:
       daydreamIconForeground: {fileID: 0}
       daydreamIconBackground: {fileID: 0}
   cloudServicesEnabled:
+    Build: 0
+    Collab: 0
+    ErrorHub: 0
+    Hub: 0
     UNet: 1
   facebookSdkVersion: 7.9.4
   apiCompatibilityLevel: 2
-  cloudProjectId: fda0f0d8-4184-4168-aae4-818730e327e1
-  projectName: SSI
+  cloudProjectId: d652c18f-d673-411b-ba0b-655df92e3447
+  projectName: SSI (1)
   organizationId: unity_qpt2okrfojyq5g
   cloudEnabled: 0
   enableNativePlatformBackendsForNewInputSystem: 0

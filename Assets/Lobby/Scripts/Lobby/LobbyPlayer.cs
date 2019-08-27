@@ -17,6 +17,8 @@ namespace Prototype.NetworkLobby
 
         public int id { get; set; }
 
+        private const string  label = "Entrez votre nom";
+
         public Button colorButton;
         public InputField nameInput;
         public Button readyButton;
@@ -31,6 +33,9 @@ namespace Prototype.NetworkLobby
         public string playerName = "";
         [SyncVar(hook = "OnMyColor")]
         public Color playerColor = Color.white;
+
+        public Color green = new Color(0, 168, 0);
+        public Color red = new Color(255, 0, 0);
 
         public Color OddRowColor = new Color(250.0f / 255.0f, 250.0f / 255.0f, 250.0f / 255.0f, 1.0f);
         public Color EvenRowColor = new Color(180.0f / 255.0f, 180.0f / 255.0f, 180.0f / 255.0f, 1.0f);
@@ -118,8 +123,15 @@ namespace Prototype.NetworkLobby
             readyButton.interactable = true;
 
             //have to use child count of player prefab already setup as "this.slot" is not set yet
-            if (playerName == "")
-                CmdNameChanged("Joueur" + (LobbyPlayerList._instance.playerListContentTransform.childCount-1));
+            if (playerName == "" || playerName == label)
+            {
+                readyButton.interactable = false;
+                CmdNameChanged(label);
+                //CmdNameChanged("Joueur" + (LobbyPlayerList._instance.playerListContentTransform.childCount-1));
+            }
+            else
+                readyButton.interactable = true;
+
 
             //we switch from simple name display to name input
             colorButton.interactable = true;
@@ -213,6 +225,23 @@ namespace Prototype.NetworkLobby
 
         public void OnNameChanged(string str)
         {
+            string nameEntered = nameInput.text.Trim();
+            if(nameEntered.Length <= 0 || nameEntered == label)
+            {
+                ColorBlock cb = readyButton.colors;
+                cb.normalColor = red;
+                readyButton.colors = cb;
+                readyButton.interactable = false;
+                readyButton.enabled = false;
+            }
+            else
+            {
+                ColorBlock cb = readyButton.colors;
+                cb.normalColor = green;
+                readyButton.colors = cb;
+                readyButton.enabled = true;
+                readyButton.interactable = true;
+            }
             CmdNameChanged(str);
         }
 

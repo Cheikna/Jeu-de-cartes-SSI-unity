@@ -417,5 +417,22 @@ namespace Prototype.NetworkLobby
             ChangeTo(mainMenuPanel);
             infoPanel.Display("Client error : " + (errorCode == 6 ? "timeout" : errorCode.ToString()), "Close", null);
         }
+
+        public void resetLobbyManager()
+        {
+            /*s_Singleton = this;
+            _lobbyHooks = GetComponent<Prototype.NetworkLobby.LobbyHook>();
+            currentPanel = mainMenuPanel;
+
+            backButton.gameObject.SetActive(false);
+            GetComponent<Canvas>().enabled = true;
+
+            DontDestroyOnLoad(gameObject);
+
+            SetServerInfo("HORS-LIGNE", "Aucun");*/
+            ChangeTo(mainMenuPanel);
+        }
+
+
     }
 }
