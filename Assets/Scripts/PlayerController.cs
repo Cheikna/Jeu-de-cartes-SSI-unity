@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
-using System.Text.RegularExpressions;
-using UnityEngine.Networking.NetworkSystem;
 using System;
 
 public class PlayerController : NetworkBehaviour
@@ -69,6 +67,10 @@ public class PlayerController : NetworkBehaviour
     private Transform position4;
     [SerializeField]
     private Text numberOfTurnsText;
+    [SerializeField]
+    private Transform computerPositionCenterTeam1;
+    [SerializeField]
+    private Transform computerPositionCenterTeam2;
     #endregion
 
     #region Bouton & Canvas [SerializedField]
@@ -219,18 +221,6 @@ public class PlayerController : NetworkBehaviour
 
             if (!teamChoosed)
                 setTeamsMembersTexts();
-            else
-            {
-                if(teamNumber == 1)
-                {
-                    computerObject.transform.position = positionCenterTeam1.position;
-                }
-                else
-                {
-                    computerObject.transform.position = positionCenterTeam2.position;
-                }
-                computerObject.transform.rotation = new Quaternion(0,90,0,1);
-            }
 
             if (allPlayersHaveChosenTheirCharacters)
             {
@@ -294,37 +284,6 @@ public class PlayerController : NetworkBehaviour
         return isItMyTurn;
     }
 
-    /*[Command]
-    public void CmdSetIsItMyTurnForAllMyTeam(int teamNumber, bool isItMyTurn)
-    {
-        RpcSetIsItMyTurnForAllMyTeam(teamNumber, isItMyTurn);
-    }*/
-
-    /*[ClientRpc]
-    public void RpcSetIsItMyTurnForAllMyTeam(int teamNumber, bool isItMyTurn)
-    {*/
-        /**
-         * Les joueurs de l'équipe en paramètre peuvent jouer ou ne plus jouer en fonction du paramètre isItMyTurn 
-         * Et les joueurs de l'équipe adverse ont donc le choix inverse
-         */
-        /*if(teamNumber == 1)
-        {
-            foreach (var pair in playersInTeam1Dico)
-                pair.Value.gameObject.GetComponent<PlayerController>().setIsItMyTurn(isItMyTurn);
-
-            foreach (var pair in playersInTeam2Dico)
-                pair.Value.gameObject.GetComponent<PlayerController>().setIsItMyTurn(!isItMyTurn);
-        }
-        else if(teamNumber == 2)
-        {
-            foreach (var pair in playersInTeam2Dico)
-                pair.Value.gameObject.GetComponent<PlayerController>().setIsItMyTurn(isItMyTurn);
-
-            foreach (var pair in playersInTeam1Dico)
-                pair.Value.gameObject.GetComponent<PlayerController>().setIsItMyTurn(!isItMyTurn);
-        }
-    }*/
-
     void addPossibilityToChooseTeamButtons()
     {
         Button[] playerButtons = GetComponentsInChildren<Button>();
@@ -371,11 +330,8 @@ public class PlayerController : NetworkBehaviour
         // Vérifie si on n'a bien récupérer tous les joueurs en comparant le nombre de joueurs du lobby et la liste où on a récupéré les joueurs
         if (playersInGame.Count != numberOfPlayersInTheGame)
             playersInGame = new List<GameObject>(GameObject.FindGameObjectsWithTag("player"));
-
-        //arbiter = arbiterControllerGameObject.GetComponent<ArbiterController>();
-        //TODO nombre de joueurs à récupérer quelques part
+        
         numberOfPlayersInLobby = Prototype.NetworkLobby.LobbyPlayerList.numberOfPlayerInTheRoom;
-        //arbiter.distributeCards(playersInGame);
 
         areAllPlayersHere = true;
     }
@@ -622,10 +578,23 @@ public class PlayerController : NetworkBehaviour
             }
         }
 
+        // Placement du joueur
         if(myFuturePosition != null)
         {
             transform.position = myFuturePosition.position;
             transform.rotation = myFuturePosition.rotation;
+        }
+
+        // Placement du l'ordinateur qui permet de voir les points de vie
+        if(teamNumber == 1)
+        {
+            computerObject.transform.position = computerPositionCenterTeam1.position;
+            computerObject.transform.rotation = computerPositionCenterTeam1.rotation;
+        }
+        else if(teamNumber == 2)
+        {
+            computerObject.transform.position = positionCenterTeam2.position;
+            computerObject.transform.rotation = positionCenterTeam2.rotation;
         }
 
     }
@@ -823,7 +792,8 @@ public class PlayerController : NetworkBehaviour
             }
         }
 
-        if (numberOfPeopleInTeam1 > 0 && numberOfPeopleInTeam2 > 0)
+        // Permet de rendre le bouton de début de partie actif uniquement s'il y a des joueurs dans les 2 équipes et que l'on a choisi une équipe
+        if (numberOfPeopleInTeam1 > 0 && numberOfPeopleInTeam2 > 0 && teamNumber != 0)
             teamChoosedButton.interactable = true;
         else
             teamChoosedButton.interactable = false;
@@ -907,8 +877,6 @@ public class PlayerController : NetworkBehaviour
     [ClientRpc]
     public void RpcIncreaseNumberOfBallsFired()
     {
-
-        Debug.Log("====> balls : " + numberOfBallsFired);
         Dictionary<NetworkInstanceId, NetworkIdentity> playersDico = NetworkServer.objects;
         PlayerController p;
         foreach (var pair in playersDico)
@@ -1017,7 +985,7 @@ public class PlayerController : NetworkBehaviour
         int lifeMin = int.MaxValue;
         // Chercher le nombre de vie minimum
         Dictionary<NetworkInstanceId, NetworkIdentity> playersDico = NetworkServer.objects;
-        PlayerController player;
+
         foreach (var pair in playersDico)
         {
             if (pair.Value.name == "Player(Clone)")

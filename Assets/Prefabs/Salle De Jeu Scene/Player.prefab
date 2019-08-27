@@ -1949,7 +1949,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &1437796828145888
 GameObject:
   m_ObjectHideFlags: 1
@@ -4000,7 +4000,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &1917439424148774
 GameObject:
   m_ObjectHideFlags: 1
@@ -4065,7 +4065,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &1928673636341282
 GameObject:
   m_ObjectHideFlags: 1
@@ -10837,6 +10837,8 @@ MonoBehaviour:
   position3: {fileID: 4482899261776672, guid: 9da7057b94b09f643abb0243dac50763, type: 2}
   position4: {fileID: 4240451325244448, guid: 9da7057b94b09f643abb0243dac50763, type: 2}
   numberOfTurnsText: {fileID: 114810867293553212}
+  computerPositionCenterTeam1: {fileID: 0}
+  computerPositionCenterTeam2: {fileID: 0}
   showMyCardsCanvas: {fileID: 223163915888527138}
   mainCanvas: {fileID: 223244088174889414}
   healthCanvas: {fileID: 223903598634506544}

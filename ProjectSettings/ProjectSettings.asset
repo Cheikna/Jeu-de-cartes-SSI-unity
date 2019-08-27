@@ -911,9 +911,9 @@ PlayerSettings:
     UNet: 1
   facebookSdkVersion: 7.9.4
   apiCompatibilityLevel: 2
-  cloudProjectId: d652c18f-d673-411b-ba0b-655df92e3447
-  projectName: SSI (1)
-  organizationId: unity_qpt2okrfojyq5g
+  cloudProjectId: 4f8ffd67-9508-4b9f-964e-f6e9743f5119
+  projectName: Security Cards Game
+  organizationId: cheikna98
   cloudEnabled: 0
   enableNativePlatformBackendsForNewInputSystem: 0
   disableOldInputManagerSupport: 0
